@@ -1,0 +1,51 @@
+{
+  "name": "@hoekma/redpop",
+  "version": "1.0.0",
+  "description": "Redis Streams Point of Presence",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "nyc mocha --recursive --exit src/**/*.unit.spec.js",
+    "test:int": "nyc mocha --recursive --exit src/**/*.integration.spec.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hoekma/redpop.git"
+  },
+  "keywords": [
+    "redis",
+    "streams"
+  ],
+  "author": "HoekTek, LLC",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hoekma/redpop/issues"
+  },
+  "homepage": "https://github.com/hoekma/redpop#readme",
+  "dependencies": {
+    "ioredis": "^4.16.0",
+    "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "assert": "^2.0.0",
+    "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "faker": "^4.1.0",
+    "mocha": "^7.1.0",
+    "nyc": "^15.0.0",
+    "prettier": "^1.19.1",
+    "sinon": "^9.0.1"
+  },
+  "nyc": {
+    "reporter": "lcov",
+    "all": true,
+    "include": [
+      "src/**/*.js"
+    ],
+    "exclude": [
+      "**/*.unit.spec.js",
+      "**/*.integration.spec.js",
+      "**/config.js",
+      "**/index.js"
+    ]
+  }
+}
