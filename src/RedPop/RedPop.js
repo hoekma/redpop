@@ -17,6 +17,8 @@ class RedPop {
    * setConfig -- ensures that the configuration is valid. Defaults to
    *           -- a standalone local redis server on port 6379
    *
+   * TODO: Add security & Encryption options
+   *
    * @param {Object} config Object with configuration
    */
 
@@ -74,27 +76,41 @@ class RedPop {
   /**
    * xlen -- calls ioredis xlen.
    *
-   * @param {string} pStreamName Optional stream name to query.
+   * @param {string} pStreamName Optional stream name parameter.
    *
    */
 
   xlen = async pStreamName => {
-    let streamName = pStreamName;
-
-    if (!streamName) {
-      streamName = this.config.stream.name;
-    }
+    const streamName = pStreamName || this.config.stream.name;
 
     return this.redis.xlen(streamName);
+  };
+
+  /**
+   * xdel -- calls ioredis xlen.
+   *
+   * @param {string} messageId Message ID To Delete
+   * @param {string} pStreamName Optional stream name parameter.
+   *
+   */
+
+  xdel = async (messageId, pStreamName) => {
+    const streamName = pStreamName || this.config.stream.name;
+
+    return this.redis.xdel(streamName, messageId);
   };
 
   /**
    * xadd -- adds a message to a redis stream
    *
    * @param {Object} message JSON object with key-value pairs.
+   * @param {String} pStreamName Optional stream name parameter
    *
    */
-  xadd = async message => {
+
+  xadd = async (message, pStreamName) => {
+    const streamName = pStreamName || this.config.stream.name;
+
     let params = [];
     Object.keys(message).map(key => {
       params.push(key);
