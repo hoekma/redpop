@@ -38,15 +38,15 @@ Ready-Made Redis Streams Subscriber and Publisher
         // name of the stream or 'topic' (default redpop)
         name: 'redpop',
     },
-    subscriber: {
+    consumer: {
         // Consumer group pool that takes the same action
-        consumerGroup: 'redpop_consumer'
+        group: 'redpop_consumer'
         // Unique name of the subscriber instance
-        consumerName: 'redpop_consumer_uuid'
+        name: 'redpop_consumer_uuid'
         // How long does the subscriber wait for a batch of messages each cycle (default 2 seconds)
-        consumerWaitTimeMs: 2000
+        waitTimeMs: 2000
         // How long the subscriber is idle before being recycled from the server pool (default 90 mins)
-        subscriberIdleTimeoutMs: 5400000
+        idleTimeoutMs: 5400000
         // If a subscriber doesn't process a message fast enough, how long before
         // the message is put back into the pool for reprocessing (default 2 mins)
         messagePendingTimeoutMs: 120000

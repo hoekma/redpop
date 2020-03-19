@@ -8,7 +8,8 @@ module.exports = {
     name: 'redpop'
   },
   consumer: {
-    consumerGroup: 'consumerGroup',
-    consumerName: 'consumerGroup' // set by subscriber class constructor
-  }
+    group: 'testGroup', // consumer group name
+    name: 'testGroup' // consumer name
+  },
+  testing: true
 };

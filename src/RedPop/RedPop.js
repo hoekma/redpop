@@ -22,8 +22,8 @@ class RedPop {
    * @param {Object} config Object with configuration
    */
 
-  setConfig = config => {
-    this.config = cloneDeep(defaultConfig);
+  setConfig(config) {
+    this.config = config || cloneDeep(defaultConfig);
     if (config && config.server) {
       this.config.server.address = config.server.address
         ? config.server.address
@@ -43,16 +43,15 @@ class RedPop {
         ? config.stream.name
         : this.config.stream.name;
     }
-  };
+  }
 
   /**
    * initRedis -- Instantiates an ioredis instance.
    */
 
-  initRedis = () => {
+  initRedis() {
     switch (this.config.server.type) {
       case 'cluster': {
-        console.log('cluster mode');
         break;
       }
       default: {
@@ -67,11 +66,10 @@ class RedPop {
           this.redis = null;
           throw new Error('Unable to create Redis connection.');
         }
-        console.log('standalone mode');
         break;
       }
     }
-  };
+  }
 
   /**
    * xlen -- calls ioredis xlen.
@@ -80,11 +78,10 @@ class RedPop {
    *
    */
 
-  xlen = async pStreamName => {
+  async xlen(pStreamName) {
     const streamName = pStreamName || this.config.stream.name;
-
     return this.redis.xlen(streamName);
-  };
+  }
 
   /**
    * xdel -- calls ioredis xlen.
@@ -94,11 +91,11 @@ class RedPop {
    *
    */
 
-  xdel = async (messageId, pStreamName) => {
+  async xdel(messageId, pStreamName) {
     const streamName = pStreamName || this.config.stream.name;
 
     return this.redis.xdel(streamName, messageId);
-  };
+  }
 
   /**
    * xadd -- adds a message to a redis stream
@@ -108,32 +105,35 @@ class RedPop {
    *
    */
 
-  xadd = async (message, pStreamName) => {
+  async xadd(message, pStreamName) {
     const streamName = pStreamName || this.config.stream.name;
 
-    let params = [];
+    const params = [];
     Object.keys(message).map(key => {
       params.push(key);
       const value = message[key];
-      switch (typeof value) {
-        case 'object': {
-          params.push(JSON.stringify(value));
-          break;
-        }
-        default: {
-          params.push(String(value));
-        }
-      }
+      params.push(JSON.stringify(value));
     });
 
-    const messageId = await this.redis.xadd(
-      this.config.stream.name,
-      '*',
-      ...params
-    );
-    console.log(messageId);
+    const messageId = await this.redis.xadd(streamName, '*', ...params);
     return messageId;
-  };
+  }
+
+  /**
+   * xreadgroup -- calls xreadgroup
+   * @param {Object} params  JSON object with xreadgroup parameters
+   */
+  async xreadgroup(params) {
+    return this.redis.xreadgroup(...params);
+  }
+
+  /**
+   * xack -- calls xack
+   * @param {String} params Array of parameters
+   */
+  async xack(params) {
+    this.redis.xack(...params);
+  }
 }
 
 module.exports = RedPop;
