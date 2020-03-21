@@ -1,8 +1,8 @@
 const RedPop = require('../RedPop');
 
 class Publisher extends RedPop {
-  constructor(config) {
-    super(config);
+  async publish(message) {
+    return this.xadd(message);
   }
 }
 

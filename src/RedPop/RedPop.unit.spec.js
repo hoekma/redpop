@@ -9,6 +9,8 @@ describe('RedPop Unit Tests', () => {
   let xaddStub, xackStub, xreadgroupStub, xdelStub, xlenStub;
   before(() => {
     RedPop = require('.');
+  });
+  beforeEach(() => {
     xaddStub = sandbox.stub(Redis.prototype, 'xadd').resolves('messageId');
     xackStub = sandbox.stub(Redis.prototype, 'xack').resolves('messageId');
     xreadgroupStub = sandbox
@@ -16,6 +18,10 @@ describe('RedPop Unit Tests', () => {
       .resolves('messageId');
     xdelStub = sandbox.stub(Redis.prototype, 'xdel').resolves('messageId');
     xlenStub = sandbox.stub(Redis.prototype, 'xlen').resolves('messageId');
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
   after(() => {
     RedPop = null;
@@ -26,6 +32,7 @@ describe('RedPop Unit Tests', () => {
     expect(redPop.config).is.an('Object');
     expect(redPop.config.server.address).equals('localhost');
   });
+
   it('instantiates with a config parameter', () => {
     const config = {
       server: {
@@ -44,6 +51,7 @@ describe('RedPop Unit Tests', () => {
     expect(redPop.config.server.type).equals('cluster');
     expect(redPop.config.stream.name).equals('someStream');
   });
+
   it('calls xlen', async () => {
     const redPop = new RedPop();
     await redPop.xlen();
@@ -78,6 +86,7 @@ describe('RedPop Unit Tests', () => {
     await redPop.xdel();
     expect(xdelStub.calledOnce).equals(true);
   });
+
   it('calls xadd', async () => {
     const redPop = new RedPop();
     await redPop.xadd([{ v: 'test', n: 12, j: { t: 'test' } }]);

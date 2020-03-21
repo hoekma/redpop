@@ -4,8 +4,8 @@
   "description": "Redis Streams Point of Presence",
   "main": "src/index.js",
   "scripts": {
-    "startDemoSubscriber": "nodemon src/demo/subscriber.js",
-    "startDemoPublisher": "nodemon src/demo/publisher.js",
+    "demoSubscriber": "nodemon src/demo/subscriber/subscriber.js",
+    "demoPublisher": "node src/demo/publisher/publisher.js",
     "start:dev": "nodemon src/index.js",
     "test": "nyc mocha --recursive --exit src/**/*.unit.spec.js",
     "test:int": "nyc mocha --recursive --exit src/**/*.integration.spec.js"
@@ -58,8 +58,10 @@
     "exclude": [
       "**/*.unit.spec.js",
       "**/*.integration.spec.js",
+      "**/config.js",
       "**/testConfig.js",
-      "**/index.js"
+      "**/index.js",
+      "src/demo/**"
     ]
   }
 }

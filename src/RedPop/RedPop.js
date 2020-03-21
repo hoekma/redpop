@@ -9,12 +9,12 @@ const cloneDeep = require('lodash/cloneDeep');
 
 class RedPop {
   constructor(config) {
-    this.setConfig(config);
+    this._setConfig(config);
     this.initRedis();
   }
 
   /**
-   * setConfig -- ensures that the configuration is valid. Defaults to
+   * _setConfig -- ensures that the configuration is valid. Defaults to
    *           -- a standalone local redis server on port 6379
    *
    * TODO: Add security & Encryption options
@@ -22,7 +22,7 @@ class RedPop {
    * @param {Object} config Object with configuration
    */
 
-  setConfig(config) {
+  _setConfig(config) {
     this.config = config || cloneDeep(defaultConfig);
     if (config && config.server) {
       this.config.server.address = config.server.address
@@ -43,6 +43,17 @@ class RedPop {
         ? config.stream.name
         : this.config.stream.name;
     }
+
+    this.setConfig();
+  }
+
+  /**
+   * setConfig -- Abstract method to do setup configuration (e.g. subscriber config)
+   * Override in a subclass.
+   */
+
+  setConfig() {
+    return true;
   }
 
   /**
@@ -69,6 +80,13 @@ class RedPop {
         break;
       }
     }
+  }
+
+  /**
+   * disconnectRedis -- releases Redis connection
+   */
+  disconnectRedis() {
+    this.redis.disconnect();
   }
 
   /**
@@ -133,6 +151,14 @@ class RedPop {
    */
   async xack(params) {
     this.redis.xack(...params);
+  }
+
+  /**
+   * xgroup -- calls xgroup
+   * @param {String} params Array of parameters
+   */
+  async xgroup(...params) {
+    await this.redis.xgroup(...params);
   }
 }
 

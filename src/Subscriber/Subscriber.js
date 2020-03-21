@@ -1,4 +1,5 @@
 const RedPop = require('../RedPop');
+const MessageBatch = require('./MessageBatch');
 const shortid = require('shortid');
 const defaultConfig = require('./config');
 const cloneDeep = require('lodash/cloneDeep');
@@ -16,17 +17,47 @@ class Subscriber extends RedPop {
 
     // process configuration in parent class RedPop
     super(config);
-    this.setConsumerName();
     this.processing = false;
   }
 
   /**
-   * setConsumeName - assigns a unique consumer name
+   * Initializer that runs at the begin of the first subscribe batch
    */
+  async _init() {
+    // Ensure consumer group exists
+    try {
+      await this.xgroup(
+        'CREATE',
+        this.config.stream.name,
+        this.config.consumer.group,
+        '$',
+        'MKSTREAM'
+      );
+    } catch (e) {}
 
-  setConsumerName() {
-    this.config.consumer.consumerName =
-      this.config.consumer.consumerName + '_' + shortid.generate();
+    await this.init();
+  }
+
+  /**
+   * setConfig
+   * Sets subscriber specific configuration settings
+   */
+  setConfig() {
+    const consumer = this.config.consumer;
+    const defConsumer = defaultConfig.consumer;
+
+    consumer.name = this.config.consumer.name + '_' + shortid.generate();
+
+    consumer.waitTimeMs = consumer.waitTimeMs || defConsumer.waitTimeMs;
+
+    consumer.messageBatchSize =
+      consumer.messageBatchSize || defConsumer.messageBatchSize;
+
+    consumer.idleTimeoutMs =
+      consumer.idleTimeoutMs || defConsumer.messageBatchSize;
+
+    consumer.messageMaximumReplays =
+      consumer.messageMaximumReplays || defConsumer.messageMaximumReplays;
   }
 
   /**
@@ -37,9 +68,9 @@ class Subscriber extends RedPop {
    * be overridden in a subclass
    */
 
-  async processMessages(messages) {
+  async _processMessages(batch) {
     Promise.all(
-      messages.map(async message => {
+      batch.getMessages().map(async message => {
         const result = await this.processMessage(message);
         if (result) {
           await this.xack(
@@ -59,30 +90,30 @@ class Subscriber extends RedPop {
   async start() {
     const stream = this.config.stream;
     const consumer = this.config.consumer;
-    const waitTimeMs = consumer.waitTimeMs || defaultConfig.consumer.waitTimeMs;
-    const messageBatchSize =
-      consumer.messageBatchSize || defaultConfig.consumer.messageBatchSize;
 
+    await this._init();
     let done = false;
 
     while (!done) {
-      const messages = await this.xreadgroup([
+      const batch = await this.xreadgroup([
         'GROUP',
         consumer.group,
         consumer.name,
         'BLOCK',
-        waitTimeMs,
+        consumer.waitTimeMs,
         'COUNT',
-        messageBatchSize,
+        consumer.messageBatchSize,
         'STREAMS',
         stream.name,
         '>'
       ]);
 
-      if (!messages) {
-        this.onBatchesComplete();
+      if (!batch) {
+        await this._onBatchesComplete();
       } else {
-        this.onBatchReceived(messages);
+        const messageBatch = new MessageBatch(batch);
+        await this._onBatchReceived(messageBatch);
+        await this._onBatchComplete();
       }
 
       if (this.config.testing) {
@@ -101,10 +132,12 @@ class Subscriber extends RedPop {
   /**
    * onBatchesComplete()
    */
-  async onBatchesProcessed() {
+  async _onBatchesComplete() {
     // Perform any post-processing after all
     // pending messages in the stream have been played
+    console.log('All Batches Complete');
     this.processing = false;
+    await this.onBatchesComplete();
   }
 
   /**
@@ -113,17 +146,17 @@ class Subscriber extends RedPop {
    *   this.processmessages should be overridden in a
    *   subclass of Subscriber
    */
-  async onBatchReceived(messages) {
+  async _onBatchReceived(messageBatch) {
     this.processing = true;
-    await this.processMessages(messages);
-    this.onBatchProcessed();
+    await this._processMessages(messageBatch);
   }
 
   /**
-   * onBatchProcessed()
+   * onBatchComplete()
    *   Perform any batch-specific post-processing
    */
-  async onBatchProcessed() {
+  async _onBatchComplete() {
+    console.log('Current Batch Complete');
     await this.onBatchComplete();
   }
 
@@ -135,7 +168,7 @@ class Subscriber extends RedPop {
    *   the middle of processing a message or if an unhandled
    *   error occurs in the processMessage() call.
    */
-  async processPendingMessages() {}
+  async _processPendingMessages() {}
 
   /**
   /**
@@ -156,6 +189,10 @@ class Subscriber extends RedPop {
   }
 
   async onBatchesComplete() {
+    return true;
+  }
+
+  async init() {
     return true;
   }
 }
