@@ -10,7 +10,7 @@ const cloneDeep = require('lodash/cloneDeep');
 class RedPop {
   constructor(config) {
     this._setConfig(config);
-    this.initRedis();
+    this._initRedis();
   }
 
   /**
@@ -57,10 +57,10 @@ class RedPop {
   }
 
   /**
-   * initRedis -- Instantiates an ioredis instance.
+   * _initRedis -- Instantiates an ioredis instance.
    */
 
-  initRedis() {
+  _initRedis() {
     switch (this.config.server.type) {
       case 'cluster': {
         break;
@@ -86,7 +86,7 @@ class RedPop {
    * disconnectRedis -- releases Redis connection
    */
   disconnectRedis() {
-    this.redis.disconnect();
+    return this.redis.disconnect();
   }
 
   /**
@@ -133,15 +133,14 @@ class RedPop {
       params.push(JSON.stringify(value));
     });
 
-    const messageId = await this.redis.xadd(streamName, '*', ...params);
-    return messageId;
+    return this.redis.xadd(streamName, '*', ...params);
   }
 
   /**
    * xreadgroup -- calls xreadgroup
    * @param {Object} params  JSON object with xreadgroup parameters
    */
-  async xreadgroup(params) {
+  async xreadgroup(...params) {
     return this.redis.xreadgroup(...params);
   }
 
@@ -149,8 +148,8 @@ class RedPop {
    * xack -- calls xack
    * @param {String} params Array of parameters
    */
-  async xack(params) {
-    this.redis.xack(...params);
+  async xack(...params) {
+    return this.redis.xack(...params);
   }
 
   /**
@@ -158,7 +157,35 @@ class RedPop {
    * @param {String} params Array of parameters
    */
   async xgroup(...params) {
-    await this.redis.xgroup(...params);
+    return this.redis.xgroup(...params);
+  }
+
+  /**
+   * xpending -- calls xpending
+   * @param {String} params Array of parameters
+   */
+  async xpending() {
+    return this.redis.xpending(
+      this.config.stream.name,
+      this.config.consumer.group,
+      '-',
+      '+',
+      this.config.consumer.batchSize
+    );
+  }
+
+  /**
+   * xclaim -- calls xpending
+   * @param {String} params Array of parameters
+   */
+  async xclaim(...messageIds) {
+    return this.redis.xclaim(
+      this.config.stream.name,
+      this.config.consumer.group,
+      this.config.consumer.name,
+      this.config.consumer.idleTimeoutMessageMs,
+      ...messageIds
+    );
   }
 }
 

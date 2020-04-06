@@ -4,6 +4,7 @@ const cloneDeep = require('lodash/cloneDeep');
 const sinon = require('sinon');
 const RedPop = require('../RedPop');
 const MessageBatch = require('./MessageBatch');
+const PendingMessages = require('./PendingMessages');
 const testConfig = require('./test/testConfig');
 const xreadgroupResponse = require('./test/xreadgroupResponse');
 
@@ -103,9 +104,11 @@ describe('Subscriber Unit Tests', () => {
 
     it('runs _init', async () => {
       const initStub = sandbox.stub(Subscriber.prototype, 'init');
+      const xgroupStub = sandbox.stub(RedPop.prototype, 'xgroup');
       const subscriber = new Subscriber(config);
       await subscriber._init();
       expect(initStub.calledOnce).equals(true);
+      expect(xgroupStub.calledOnce).equals(true);
     });
 
     it('runs abstract method init', async () => {
@@ -117,18 +120,36 @@ describe('Subscriber Unit Tests', () => {
       const xreadgroup = sandbox
         .stub(RedPop.prototype, 'xreadgroup')
         .resolves(xreadgroupResponse);
+      const xgroupStub = sandbox.stub(RedPop.prototype, 'xgroup');
       const subscriber = new Subscriber(config);
       await subscriber.start();
       expect(xreadgroup.calledOnce).equals(true);
+      expect(xgroupStub.calledOnce).equals(true);
     });
 
     it('starts the subscriber and completes batches', async () => {
-      const xreadgroup = sandbox
+      const xreadgroupStub = sandbox
         .stub(RedPop.prototype, 'xreadgroup')
         .resolves(null);
+      const xgroupStub = sandbox.stub(RedPop.prototype, 'xgroup');
+      const pendingMessagesStub = sandbox.stub(
+        PendingMessages.prototype,
+        'processPendingMessages'
+      );
       const subscriber = new Subscriber(config);
       await subscriber.start();
-      expect(xreadgroup.calledOnce).equals(true);
+      expect(
+        xreadgroupStub.calledOnce,
+        'xreadgroup should have been called'
+      ).equals(true);
+      expect(
+        xgroupStub.calledOnce,
+        'xgroupStub should have been called'
+      ).equals(true);
+      expect(
+        pendingMessagesStub.calledOnce,
+        'pendingMessagesStub should have been called'
+      ).equals(true);
     });
   });
 });

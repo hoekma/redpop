@@ -5,7 +5,7 @@ const publisher = new Publisher();
 
 (async () => {
   let i;
-  for (i = 0; i < 50; i++) {
+  for (i = 0; i < 1; i++) {
     await publisher.publish(message);
   }
   console.log(`Successfully published ${i} messages`);

@@ -51,7 +51,7 @@ Ready-Made Redis Streams Subscriber and Publisher
         // the message is put back into the pool for reprocessing (default 2 mins)
         messagePendingTimeoutMs: 120000
         // How many messages will the subscriber pull from the server each time (default 50)
-        messageBatchSize: 50
+        batchSize: 50
         // How many times does a message get replayed before the message is discarded (default 3)
         // This will discard a message if it is erroring out repeatedly
         messageMaximumReplays: 3

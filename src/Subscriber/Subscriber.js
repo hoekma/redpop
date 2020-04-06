@@ -1,5 +1,7 @@
 const RedPop = require('../RedPop');
 const MessageBatch = require('./MessageBatch');
+const PendingMessages = require('./PendingMessages');
+
 const shortid = require('shortid');
 const defaultConfig = require('./config');
 const cloneDeep = require('lodash/cloneDeep');
@@ -14,7 +16,6 @@ const cloneDeep = require('lodash/cloneDeep');
 class Subscriber extends RedPop {
   constructor(config) {
     config = config || cloneDeep(defaultConfig);
-
     // process configuration in parent class RedPop
     super(config);
     this.processing = false;
@@ -50,11 +51,9 @@ class Subscriber extends RedPop {
 
     consumer.waitTimeMs = consumer.waitTimeMs || defConsumer.waitTimeMs;
 
-    consumer.messageBatchSize =
-      consumer.messageBatchSize || defConsumer.messageBatchSize;
+    consumer.batchSize = consumer.batchSize || defConsumer.batchSize;
 
-    consumer.idleTimeoutMs =
-      consumer.idleTimeoutMs || defConsumer.messageBatchSize;
+    consumer.idleTimeoutMs = consumer.idleTimeoutMs || defConsumer.batchSize;
 
     consumer.messageMaximumReplays =
       consumer.messageMaximumReplays || defConsumer.messageMaximumReplays;
@@ -102,7 +101,7 @@ class Subscriber extends RedPop {
         'BLOCK',
         consumer.waitTimeMs,
         'COUNT',
-        consumer.messageBatchSize,
+        consumer.batchSize,
         'STREAMS',
         stream.name,
         '>'
@@ -133,11 +132,11 @@ class Subscriber extends RedPop {
    * onBatchesComplete()
    */
   async _onBatchesComplete() {
-    // Perform any post-processing after all
-    // pending messages in the stream have been played
-    console.log('All Batches Complete');
+    // Perform post-processing after all
+    // messages in the stream have been played
     this.processing = false;
     await this.onBatchesComplete();
+    await this._processPendingMessages();
   }
 
   /**
@@ -168,7 +167,10 @@ class Subscriber extends RedPop {
    *   the middle of processing a message or if an unhandled
    *   error occurs in the processMessage() call.
    */
-  async _processPendingMessages() {}
+  async _processPendingMessages() {
+    const pendingMessages = new PendingMessages(this);
+    await pendingMessages.processPendingMessages();
+  }
 
   /**
   /**
@@ -184,14 +186,26 @@ class Subscriber extends RedPop {
     return true;
   }
 
+  /**
+   * onBatchComplete
+   *
+   */
   async onBatchComplete() {
     return true;
   }
 
+  /**
+   * onBatchesComplete
+   *
+   */
   async onBatchesComplete() {
     return true;
   }
 
+  /**
+   * init()
+   *
+   */
   async init() {
     return true;
   }

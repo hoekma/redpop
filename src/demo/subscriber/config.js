@@ -11,8 +11,9 @@ module.exports = {
     group: 'consumerGroup',
     name: 'consumerGroup',
     waitTimeMs: 2000,
-    messageBatchSize: 50,
-    idleTimeoutMs: 5400000,
+    batchSize: 50,
+    idleTimeoutMessageMs: 600000,
+    idleTimeoutSubscriberMs: 5400000,
     messageMaximumReplays: 3
   }
 };

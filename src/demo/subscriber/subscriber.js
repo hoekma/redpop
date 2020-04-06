@@ -9,7 +9,7 @@ class DemoSubscriber extends Subscriber {
     this.messageCountAllBatches = 0;
   }
 
-  async _onBatchComplete() {
+  async onBatchComplete() {
     console.log(
       `Processed ${this.messageCountCurrentBatch} messages in batch ${this.batchCount}`
     );
@@ -17,7 +17,7 @@ class DemoSubscriber extends Subscriber {
     this.messageCountCurrentBatch = 0;
   }
 
-  async _onBatchesComplete() {
+  async onBatchesComplete() {
     if (this.messageCountAllBatches > 0) {
       console.log(
         `Processed ${this.messageCountAllBatches} messages in ${this
