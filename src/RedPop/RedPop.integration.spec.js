@@ -17,8 +17,8 @@ describe('RedPop Integration Tests', () => {
       expect(length).to.be.a('Number');
     });
 
-    it('successfully xadd and xdelete a message', async () => {
-      // Build a message with multiple keys. Each key as a different data type
+    it('successfully xadd and xdelete an event', async () => {
+      // Build an event with multiple keys. Each key as a different data type
       // including string, number, date, image, and JSON object.
       const jsonText = `{
           "${faker.lorem.word()}": "${faker.lorem.word()}",
@@ -27,20 +27,20 @@ describe('RedPop Integration Tests', () => {
           "${faker.lorem.word()}": "${faker.image.image()}",
           "${faker.lorem.word()}": {"${faker.lorem.word()}": "${faker.lorem.word()}"}}
       `;
-      const jsonMessage = JSON.parse(jsonText);
+      const jsonEvent = JSON.parse(jsonText);
 
-      // Get a new RedPop instance and add a message
+      // Get a new RedPop instance and add an event
       const redPop = new RedPop();
       // Store the current length of the stream
       const lengthBefore = await redPop.xlen();
-      // Add a message - validate and store the message Id
-      const messageId = await redPop.xadd(jsonMessage);
-      expect(messageId).to.be.a('String');
-      expect(messageId.length).equals(15);
+      // Add an event - validate and store the event Id
+      const eventId = await redPop.xadd(jsonEvent);
+      expect(eventId).to.be.a('String');
+      expect(eventId.length).equals(15);
       // Verify the new length of the stream is > than before
       expect(await redPop.xlen()).greaterThan(lengthBefore);
-      // Delete the new message and verify stream-length goes back to pre-add length
-      await redPop.xdel(messageId);
+      // Delete the new event and verify stream-length goes back to pre-add length
+      await redPop.xdel(eventId);
       expect(await redPop.xlen()).equals(lengthBefore);
     });
   });

@@ -104,32 +104,32 @@ class RedPop {
   /**
    * xdel -- calls ioredis xlen.
    *
-   * @param {string} messageId Message ID To Delete
+   * @param {string} eventId Event ID To Delete
    * @param {string} pStreamName Optional stream name parameter.
    *
    */
 
-  async xdel(messageId, pStreamName) {
+  async xdel(eventId, pStreamName) {
     const streamName = pStreamName || this.config.stream.name;
 
-    return this.redis.xdel(streamName, messageId);
+    return this.redis.xdel(streamName, eventId);
   }
 
   /**
-   * xadd -- adds a message to a redis stream
+   * xadd -- adds an event to a redis stream
    *
-   * @param {Object} message JSON object with key-value pairs.
+   * @param {Object} event JSON object with key-value pairs.
    * @param {String} pStreamName Optional stream name parameter
    *
    */
 
-  async xadd(message, pStreamName) {
+  async xadd(event, pStreamName) {
     const streamName = pStreamName || this.config.stream.name;
 
     const params = [];
-    Object.keys(message).map(key => {
+    Object.keys(event).map(key => {
       params.push(key);
-      const value = message[key];
+      const value = event[key];
       params.push(JSON.stringify(value));
     });
 
@@ -178,13 +178,13 @@ class RedPop {
    * xclaim -- calls xpending
    * @param {String} params Array of parameters
    */
-  async xclaim(...messageIds) {
+  async xclaim(...eventIds) {
     return this.redis.xclaim(
       this.config.stream.name,
       this.config.consumer.group,
       this.config.consumer.name,
-      this.config.consumer.idleTimeoutMessageMs,
-      ...messageIds
+      this.config.consumer.idleTimeoutEventMs,
+      ...eventIds
     );
   }
 }

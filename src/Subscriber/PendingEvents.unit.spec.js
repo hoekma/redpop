@@ -1,11 +1,11 @@
 const { expect } = require('chai');
-const PendingMessages = require('./PendingMessages');
-const Subscriber = require('../Subscriber');
+const PendingEvents = require('./PendingEvents');
+const Subscriber = require('.');
 const testConfig = require('./test/testConfig');
 const sinon = require('sinon');
 const sandbox = sinon.createSandbox();
 
-const messages = [
+const events = [
   ['1584670546084-7', 'consumerGroup_zpUUkOZdI', 1085424347, 1],
   ['1584670546084-8', 'consumerGroup_zpUUkOZdI', 1085424347, 2],
   ['1584670546084-9', 'consumerGroup_zpUUkOZdI', 1085424347, 3],
@@ -16,35 +16,35 @@ const messages = [
   ['1584670546085-3', 'consumerGroup_zpUUkOZdI', 1085424347, 1]
 ];
 
-describe.only('PendingMessages Unit Test', () => {
+describe('PendingEvents Unit Test', () => {
   let xackStub, xpendingStub, xclaimStub;
   beforeEach(() => {
     xackStub = sandbox.stub(Subscriber.prototype, 'xack');
     xpendingStub = sandbox
-      .stub(PendingMessages.prototype, 'xpending')
-      .resolves(messages);
-    xclaimStub = sandbox.stub(PendingMessages.prototype, 'xclaim').resolves([]);
+      .stub(PendingEvents.prototype, 'xpending')
+      .resolves(events);
+    xclaimStub = sandbox.stub(PendingEvents.prototype, 'xclaim').resolves([]);
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  it('removes messages that have reached maximum retries', async () => {
+  it('removes events that have reached maximum retries', async () => {
     const subscriber = new Subscriber(testConfig);
-    const pendingMessages = new PendingMessages(subscriber);
-    pendingMessages._pendingMessages = messages;
-    await pendingMessages._removeMaxRetries();
-    // this will remove the message with the 4 retries.
-    expect(pendingMessages._pendingMessages.length).equals(7);
+    const pendingEvents = new PendingEvents(subscriber);
+    pendingEvents._pendingEvents = events;
+    await pendingEvents._removeMaxRetries();
+    // this will remove the event with the 4 retries.
+    expect(pendingEvents._pendingEvents.length).equals(7);
     expect(xackStub.calledOnce).equals(true);
   });
 
-  it('processes pending messages', async () => {
+  it('processes pending events', async () => {
     const subscriber = new Subscriber(testConfig);
-    const pendingMessages = new PendingMessages(subscriber);
-    await pendingMessages.processPendingMessages();
-    // this will remove the message with the 4 retries.
+    const pendingEvents = new PendingEvents(subscriber);
+    await pendingEvents.processPendingEvents();
+    // this will remove the event with the 4 retries.
     expect(xpendingStub.calledOnce, 'xpendingStub should be called').equals(
       true
     );

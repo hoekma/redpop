@@ -11,13 +11,13 @@ describe('RedPop Unit Tests', () => {
     RedPop = require('.');
   });
   beforeEach(() => {
-    xaddStub = sandbox.stub(Redis.prototype, 'xadd').resolves('messageId');
-    xackStub = sandbox.stub(Redis.prototype, 'xack').resolves('messageId');
+    xaddStub = sandbox.stub(Redis.prototype, 'xadd').resolves('eventId');
+    xackStub = sandbox.stub(Redis.prototype, 'xack').resolves('eventId');
     xreadgroupStub = sandbox
       .stub(Redis.prototype, 'xreadgroup')
-      .resolves('messageId');
-    xdelStub = sandbox.stub(Redis.prototype, 'xdel').resolves('messageId');
-    xlenStub = sandbox.stub(Redis.prototype, 'xlen').resolves('messageId');
+      .resolves('eventId');
+    xdelStub = sandbox.stub(Redis.prototype, 'xdel').resolves('eventId');
+    xlenStub = sandbox.stub(Redis.prototype, 'xlen').resolves('eventId');
   });
 
   afterEach(() => {
@@ -60,7 +60,7 @@ describe('RedPop Unit Tests', () => {
 
   it('calls xack', async () => {
     const redPop = new RedPop();
-    await redPop.xack('stream', 'group', 'messageId');
+    await redPop.xack('stream', 'group', 'eventId');
     expect(xackStub.calledOnce).equals(true);
   });
 

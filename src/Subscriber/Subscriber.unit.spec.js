@@ -3,8 +3,8 @@ const shortid = require('shortid');
 const cloneDeep = require('lodash/cloneDeep');
 const sinon = require('sinon');
 const RedPop = require('../RedPop');
-const MessageBatch = require('./MessageBatch');
-const PendingMessages = require('./PendingMessages');
+const EventBatch = require('./EventBatch');
+const PendingEvents = require('./PendingEvents');
 const testConfig = require('./test/testConfig');
 const xreadgroupResponse = require('./test/xreadgroupResponse');
 
@@ -22,7 +22,7 @@ describe('Subscriber Unit Tests', () => {
     config = cloneDeep(testConfig);
     xack = sandbox.stub(RedPop.prototype, 'xack');
     sandbox
-      .stub(MessageBatch.prototype, 'getMessages')
+      .stub(EventBatch.prototype, 'getEvents')
       .returns([{ streamName: 'redpop', data: { d: 'test' } }]);
   });
 
@@ -55,9 +55,9 @@ describe('Subscriber Unit Tests', () => {
       expect((subscriber.processing = false));
     });
 
-    it('has abstract method processMessage', async () => {
+    it('has abstract method processEvent', async () => {
       const subscriber = new Subscriber(config);
-      const result = await subscriber.processMessage();
+      const result = await subscriber.processEvent();
       expect(result).equals(true);
     });
 
@@ -88,17 +88,17 @@ describe('Subscriber Unit Tests', () => {
       await subscriber.onBatchComplete();
     });
 
-    it('runs _processMessages', async () => {
+    it('runs _processEvents', async () => {
       const subscriber = new Subscriber(config);
-      const messageBatch = new MessageBatch(xreadgroupResponse);
-      await subscriber._processMessages(messageBatch);
+      const eventBatch = new EventBatch(xreadgroupResponse);
+      await subscriber._processEvents(eventBatch);
       expect(xack.calledOnce).equals(true);
     });
 
     it('runs _onBatchReceived', async () => {
       const subscriber = new Subscriber(config);
-      const messageBatch = new MessageBatch(xreadgroupResponse);
-      await subscriber._onBatchReceived(messageBatch);
+      const eventBatch = new EventBatch(xreadgroupResponse);
+      await subscriber._onBatchReceived(eventBatch);
       expect(xack.calledOnce).equals(true);
     });
 
@@ -116,7 +116,7 @@ describe('Subscriber Unit Tests', () => {
       await subscriber.init();
     });
 
-    it('starts the subscriber and plays a message', async () => {
+    it('starts the subscriber and plays an event', async () => {
       const xreadgroup = sandbox
         .stub(RedPop.prototype, 'xreadgroup')
         .resolves(xreadgroupResponse);
@@ -132,9 +132,9 @@ describe('Subscriber Unit Tests', () => {
         .stub(RedPop.prototype, 'xreadgroup')
         .resolves(null);
       const xgroupStub = sandbox.stub(RedPop.prototype, 'xgroup');
-      const pendingMessagesStub = sandbox.stub(
-        PendingMessages.prototype,
-        'processPendingMessages'
+      const pendingEventsStub = sandbox.stub(
+        PendingEvents.prototype,
+        'processPendingEvents'
       );
       const subscriber = new Subscriber(config);
       await subscriber.start();
@@ -147,8 +147,8 @@ describe('Subscriber Unit Tests', () => {
         'xgroupStub should have been called'
       ).equals(true);
       expect(
-        pendingMessagesStub.calledOnce,
-        'pendingMessagesStub should have been called'
+        pendingEventsStub.calledOnce,
+        'pendingEventsStub should have been called'
       ).equals(true);
     });
   });

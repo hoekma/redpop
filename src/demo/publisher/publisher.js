@@ -1,16 +1,16 @@
 const Publisher = require('../../Publisher');
-const message = require('./publishData');
+const event = require('./publishData');
 
 const publisher = new Publisher();
 
 (async () => {
   let i;
   for (i = 0; i < 1; i++) {
-    await publisher.publish(message);
+    await publisher.publish(event);
   }
-  console.log(`Successfully published ${i} messages`);
+  console.log(`Successfully published ${i} events`);
   const streamLength = await publisher.xlen();
-  console.log(`Stream "redpop" now has ${streamLength} messages`);
+  console.log(`Stream "redpop" now has ${streamLength} events`);
   publisher.disconnectRedis();
   process.exit();
 })();

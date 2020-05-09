@@ -1,6 +1,6 @@
 const RedPop = require('../RedPop');
-const MessageBatch = require('./MessageBatch');
-const PendingMessages = require('./PendingMessages');
+const EventBatch = require('./EventBatch');
+const PendingEvents = require('./PendingEvents');
 
 const shortid = require('shortid');
 const defaultConfig = require('./config');
@@ -10,7 +10,7 @@ const cloneDeep = require('lodash/cloneDeep');
  * Subscriber is an abstract class that encapsulates
  * the functionalty to run a subscriber.  A subclass
  * should extend this class and override the abstract
- * method(s).  At a minimum, processMessage should be extended.
+ * method(s).  At a minimum, processEvent should be extended.
  *
  */
 class Subscriber extends RedPop {
@@ -55,27 +55,27 @@ class Subscriber extends RedPop {
 
     consumer.idleTimeoutMs = consumer.idleTimeoutMs || defConsumer.batchSize;
 
-    consumer.messageMaximumReplays =
-      consumer.messageMaximumReplays || defConsumer.messageMaximumReplays;
+    consumer.eventMaximumReplays =
+      consumer.eventMaximumReplays || defConsumer.eventMaximumReplays;
   }
 
   /**
-   * processMessages
+   * processEvents
    *
-   * @param {Object} messages - Array of messages received via ioredis.
-   * Processes a batch of messages calling the users. utiltiy processMessage()
+   * @param {Object} events - Array of events received via ioredis.
+   * Processes a batch of events calling the users. utiltiy processEvent()
    * be overridden in a subclass
    */
 
-  async _processMessages(batch) {
+  async _processEvents(batch) {
     Promise.all(
-      batch.getMessages().map(async message => {
-        const result = await this.processMessage(message);
+      batch.getEvents().map(async event => {
+        const result = await this.processEvent(event);
         if (result) {
           await this.xack(
             this.config.stream.name,
             this.config.consumer.group,
-            message.id
+            event.id
           );
         }
       })
@@ -83,7 +83,7 @@ class Subscriber extends RedPop {
   }
 
   /**
-   * poll -- Main loop to poll Redis for messages
+   * poll -- Main loop to poll Redis for events
    */
 
   async start() {
@@ -110,8 +110,8 @@ class Subscriber extends RedPop {
       if (!batch) {
         await this._onBatchesComplete();
       } else {
-        const messageBatch = new MessageBatch(batch);
-        await this._onBatchReceived(messageBatch);
+        const eventBatch = new EventBatch(batch);
+        await this._onBatchReceived(eventBatch);
         await this._onBatchComplete();
       }
 
@@ -133,21 +133,21 @@ class Subscriber extends RedPop {
    */
   async _onBatchesComplete() {
     // Perform post-processing after all
-    // messages in the stream have been played
+    // events in the stream have been played
     this.processing = false;
     await this.onBatchesComplete();
-    await this._processPendingMessages();
+    await this._processPendingEvents();
   }
 
   /**
    * onBatchReceived()
-   *   Process the new batch of messages.
-   *   this.processmessages should be overridden in a
+   *   Process the new batch of events.
+   *   this.processevents should be overridden in a
    *   subclass of Subscriber
    */
-  async _onBatchReceived(messageBatch) {
+  async _onBatchReceived(eventBatch) {
     this.processing = true;
-    await this._processMessages(messageBatch);
+    await this._processEvents(eventBatch);
   }
 
   /**
@@ -160,16 +160,16 @@ class Subscriber extends RedPop {
   }
 
   /**
-   * processPendingMessage()
-   *   Process any messages that were played by other
+   * processPendingEvent()
+   *   Process any events that were played by other
    *   subscribers and didn't result in an xack.  This
    *   can happen if the subbscriber is terminated in
-   *   the middle of processing a message or if an unhandled
-   *   error occurs in the processMessage() call.
+   *   the middle of processing an event or if an unhandled
+   *   error occurs in the processEvent() call.
    */
-  async _processPendingMessages() {
-    const pendingMessages = new PendingMessages(this);
-    await pendingMessages.processPendingMessages();
+  async _processPendingEvents() {
+    const pendingEvents = new PendingEvents(this);
+    await pendingEvents.processPendingEvents();
   }
 
   /**
@@ -178,11 +178,11 @@ class Subscriber extends RedPop {
    */
 
   /**
-   * processMessage
+   * processEvent
    *
    */
 
-  async processMessage(message) {
+  async processEvent(event) {
     return true;
   }
 

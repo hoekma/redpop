@@ -5,34 +5,34 @@ class DemoSubscriber extends Subscriber {
   constructor(config) {
     super(config);
     this.batchCount = 0;
-    this.messageCountCurrentBatch = 0;
-    this.messageCountAllBatches = 0;
+    this.eventCountCurrentBatch = 0;
+    this.eventCountAllBatches = 0;
   }
 
   async onBatchComplete() {
     console.log(
-      `Processed ${this.messageCountCurrentBatch} messages in batch ${this.batchCount}`
+      `Processed ${this.eventCountCurrentBatch} events in batch ${this.batchCount}`
     );
     this.batchCount++;
-    this.messageCountCurrentBatch = 0;
+    this.eventCountCurrentBatch = 0;
   }
 
   async onBatchesComplete() {
-    if (this.messageCountAllBatches > 0) {
+    if (this.eventCountAllBatches > 0) {
       console.log(
-        `Processed ${this.messageCountAllBatches} messages in ${this
-          .batchCount - 1} batches`
+        `Processed ${this.eventCountAllBatches} events in ${this.batchCount -
+          1} batches`
       );
-      this.messageCountAllBatches = 0;
+      this.eventCountAllBatches = 0;
       this.batchCount = 0;
     } else {
       process.stdout.write('.');
     }
   }
 
-  async processMessage(message) {
-    this.messageCountCurrentBatch++;
-    this.messageCountAllBatches++;
+  async processEvent(event) {
+    this.eventCountCurrentBatch++;
+    this.eventCountAllBatches++;
     return true;
   }
 }
