@@ -58,9 +58,11 @@ class Consumer extends RedPop {
   /**
    * processEvents
    *
-   * @param {Object} events - Array of events received via ioredis.
    * Processes a batch of events calling the users. utiltiy processEvent()
    * be overridden in a subclass
+   *
+   * @param {Object} events - Array of events received via ioredis.
+   *
    */
 
   async _processEvents(batch) {
