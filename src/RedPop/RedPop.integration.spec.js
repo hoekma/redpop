@@ -11,13 +11,13 @@ describe('RedPop Integration Tests', () => {
   });
 
   describe('RedPop Integration Tests - Positive', () => {
-    it('RedPop::xlen returns an integer', async () => {
+    it('xlen returns an integer', async () => {
       const redPop = new RedPop();
       const length = await redPop.xlen();
       expect(length).to.be.a('Number');
     });
 
-    it('successfully xadd and xdelete an event', async () => {
+    it('xadd, xdel, xlen', async () => {
       // Build an event with multiple keys. Each key as a different data type
       // including string, number, date, image, and JSON object.
       const jsonText = `{

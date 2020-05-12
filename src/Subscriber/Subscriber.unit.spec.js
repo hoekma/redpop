@@ -14,6 +14,8 @@ describe('Subscriber Unit Tests', () => {
   let Subscriber;
   let config;
   let xack;
+  let pendingEventsStub;
+
   before(() => {
     Subscriber = require('.');
   });
@@ -24,6 +26,10 @@ describe('Subscriber Unit Tests', () => {
     sandbox
       .stub(EventBatch.prototype, 'getEvents')
       .returns([{ streamName: 'redpop', data: { d: 'test' } }]);
+    pendingEventsStub = sandbox.stub(
+      PendingEvents.prototype,
+      'processPendingEvents'
+    );
   });
 
   afterEach(() => {
@@ -132,10 +138,6 @@ describe('Subscriber Unit Tests', () => {
         .stub(RedPop.prototype, 'xreadgroup')
         .resolves(null);
       const xgroupStub = sandbox.stub(RedPop.prototype, 'xgroup');
-      const pendingEventsStub = sandbox.stub(
-        PendingEvents.prototype,
-        'processPendingEvents'
-      );
       const subscriber = new Subscriber(config);
       await subscriber.start();
       expect(

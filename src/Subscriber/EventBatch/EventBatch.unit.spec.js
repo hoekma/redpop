@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const EventBatch = require('./EventBatch');
-const xreadgroupResponse = require('./test/xreadgroupResponse');
+const xreadgroupResponse = require('../test/xreadgroupResponse');
 
 describe('MessgeBatch Unit Test', () => {
   it('loads an ioredis event', () => {

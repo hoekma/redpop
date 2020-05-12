@@ -5,19 +5,27 @@ const sinon = require('sinon');
 const sandbox = sinon.createSandbox();
 
 describe('RedPop Unit Tests', () => {
-  let RedPop;
-  let xaddStub, xackStub, xreadgroupStub, xdelStub, xlenStub;
+  let RedPop,
+    xaddStub,
+    xackStub,
+    xreadgroupStub,
+    xdelStub,
+    xlenStub,
+    xtrimStub,
+    xclaimStub;
   before(() => {
     RedPop = require('.');
   });
   beforeEach(() => {
     xaddStub = sandbox.stub(Redis.prototype, 'xadd').resolves('eventId');
     xackStub = sandbox.stub(Redis.prototype, 'xack').resolves('eventId');
+    xdelStub = sandbox.stub(Redis.prototype, 'xdel').resolves('eventId');
+    xlenStub = sandbox.stub(Redis.prototype, 'xlen').resolves('eventId');
+    xtrimStub = sandbox.stub(Redis.prototype, 'xtrim').resolves(1);
+    xclaimStub = sandbox.stub(Redis.prototype, 'xclaim').resolves([]);
     xreadgroupStub = sandbox
       .stub(Redis.prototype, 'xreadgroup')
       .resolves('eventId');
-    xdelStub = sandbox.stub(Redis.prototype, 'xdel').resolves('eventId');
-    xlenStub = sandbox.stub(Redis.prototype, 'xlen').resolves('eventId');
   });
 
   afterEach(() => {
@@ -58,9 +66,28 @@ describe('RedPop Unit Tests', () => {
     expect(xlenStub.calledOnce).equals(true);
   });
 
+  it('calls xdel', async () => {
+    const redPop = new RedPop();
+    await redPop.xdel();
+    expect(xdelStub.calledOnce).equals(true);
+  });
+
+  it('calls xadd', async () => {
+    const redPop = new RedPop();
+    await redPop.xadd([{ v: 'test', n: 12, j: { t: 'test' } }]);
+    expect(xaddStub.calledOnce).equals(true);
+  });
+
+  it('calls xtrim', async () => {
+    const redPop = new RedPop();
+    const numberTrimmed = await redPop.xtrim(10);
+    expect(xtrimStub.calledOnce).equals(true);
+    expect(numberTrimmed).equals(1);
+  });
+
   it('calls xack', async () => {
     const redPop = new RedPop();
-    await redPop.xack('stream', 'group', 'eventId');
+    await redPop.xack('eventId', 'stream', 'group');
     expect(xackStub.calledOnce).equals(true);
   });
 
@@ -81,15 +108,11 @@ describe('RedPop Unit Tests', () => {
     expect(xreadgroupStub.calledOnce).equals(true);
   });
 
-  it('calls xdel', async () => {
-    const redPop = new RedPop();
-    await redPop.xdel();
-    expect(xdelStub.calledOnce).equals(true);
-  });
-
-  it('calls xadd', async () => {
-    const redPop = new RedPop();
-    await redPop.xadd([{ v: 'test', n: 12, j: { t: 'test' } }]);
-    expect(xaddStub.calledOnce).equals(true);
+  it('calls xclaim', async () => {
+    const config = require('./test/testConfig');
+    const redPop = new RedPop(config);
+    const xclaimedMessages = await redPop.xclaim([12345]);
+    expect(xclaimStub.calledOnce).equals(true);
+    expect(Array.isArray(xclaimedMessages)).equals(true);
   });
 });

@@ -5,15 +5,15 @@ module.exports = {
     connectionType: 'standalone'
   },
   stream: {
-    name: 'redpop'
+    name: 'redpopdemo'
   },
   consumer: {
-    group: 'consumerGroup',
-    name: 'consumerGroup',
+    group: 'demoConsumerGroup',
+    name: 'demoConsumerGroup',
     waitTimeMs: 2000,
     batchSize: 50,
-    idleEventTimeoutMs: 600000,
-    idleConsumererTimeoutMs: 5400000,
-    messageMaximumReplays: 3
+    pendingEventTimeoutMs: 10000,
+    idleSubscriberTimeoutMs: 10000,
+    eventMaximumReplays: 3
   }
 };

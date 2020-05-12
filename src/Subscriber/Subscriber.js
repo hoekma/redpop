@@ -1,7 +1,7 @@
 const RedPop = require('../RedPop');
-const EventBatch = require('./EventBatch');
+const EventBatch = require('./EventBatch/EventBatch');
 const PendingEvents = require('./PendingEvents');
-
+const IdleConsumers = require('./IdleConsumers');
 const shortid = require('shortid');
 const defaultConfig = require('./config');
 const cloneDeep = require('lodash/cloneDeep');
@@ -48,13 +48,9 @@ class Subscriber extends RedPop {
     const defConsumer = defaultConfig.consumer;
 
     consumer.name = this.config.consumer.name + '_' + shortid.generate();
-
     consumer.waitTimeMs = consumer.waitTimeMs || defConsumer.waitTimeMs;
-
     consumer.batchSize = consumer.batchSize || defConsumer.batchSize;
-
     consumer.idleTimeoutMs = consumer.idleTimeoutMs || defConsumer.batchSize;
-
     consumer.eventMaximumReplays =
       consumer.eventMaximumReplays || defConsumer.eventMaximumReplays;
   }
@@ -72,11 +68,7 @@ class Subscriber extends RedPop {
       batch.getEvents().map(async event => {
         const result = await this.processEvent(event);
         if (result) {
-          await this.xack(
-            this.config.stream.name,
-            this.config.consumer.group,
-            event.id
-          );
+          await this.xack(event.id);
         }
       })
     );
@@ -122,6 +114,8 @@ class Subscriber extends RedPop {
         done = true;
       }
     }
+
+    return 'stopped';
   }
 
   /**
@@ -137,6 +131,7 @@ class Subscriber extends RedPop {
     this.processing = false;
     await this.onBatchesComplete();
     await this._processPendingEvents();
+    await this._removeIdleConsumers();
   }
 
   /**
@@ -155,7 +150,7 @@ class Subscriber extends RedPop {
    *   Perform any batch-specific post-processing
    */
   async _onBatchComplete() {
-    console.log('Current Batch Complete');
+    console.info('Current Batch Complete');
     await this.onBatchComplete();
   }
 
@@ -170,6 +165,16 @@ class Subscriber extends RedPop {
   async _processPendingEvents() {
     const pendingEvents = new PendingEvents(this);
     await pendingEvents.processPendingEvents();
+  }
+
+  /**
+   * removeIdleSubscribers()
+   *   Remove subscribers that have been idle
+   *   longer than config.consumer.idleConsumerTimeoutMs
+   */
+  async _removeIdleConsumers() {
+    const idleConsumers = new IdleConsumers(this);
+    await idleConsumers.removeIdleConsumers();
   }
 
   /**

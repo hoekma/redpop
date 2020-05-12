@@ -6,9 +6,10 @@
   "scripts": {
     "demoSubscriber": "nodemon src/demo/subscriber/subscriber.js",
     "demoPublisher": "node src/demo/publisher/publisher.js",
+    "demoReplay": "node src/demo/replay/replay.js",
     "start:dev": "nodemon src/index.js",
-    "test": "nyc mocha --recursive --exit src/**/*.unit.spec.js",
-    "test:int": "nyc mocha --recursive --exit src/**/*.integration.spec.js"
+    "test": "nyc mocha --recursive --exit 'src/**/*.unit.spec.js'",
+    "test:int": "nyc mocha --recursive --exit 'src/**/*.integration.spec.js'"
   },
   "repository": {
     "type": "git",

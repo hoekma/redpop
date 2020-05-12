@@ -4,7 +4,11 @@ const cloneDeep = require('lodash/cloneDeep');
 
 /**
  * Class RedPop -- Top level class from which subscribers and pubishers inherit
- *              -- Handles all REDIS setup
+ *              -- Handles all REDIS setup.
+ *              -- RedPop also provides helper logic based on knowing the config
+ *              -- context of sub-classes so it inverts some of the order of parameters
+ *              -- as compared to ioredis functions that are essentially passthrough to
+ *              -- the core Redis commands.
  */
 
 class RedPop {
@@ -92,12 +96,12 @@ class RedPop {
   /**
    * xlen -- calls ioredis xlen.
    *
-   * @param {string} pStreamName Optional stream name parameter.
+   * @param {string} stream Optional stream name parameter.
    *
    */
 
-  async xlen(pStreamName) {
-    const streamName = pStreamName || this.config.stream.name;
+  async xlen(stream) {
+    const streamName = stream || this.config.stream.name;
     return this.redis.xlen(streamName);
   }
 
@@ -105,12 +109,12 @@ class RedPop {
    * xdel -- calls ioredis xlen.
    *
    * @param {string} eventId Event ID To Delete
-   * @param {string} pStreamName Optional stream name parameter.
+   * @param {string} stream Optional stream name parameter.
    *
    */
 
-  async xdel(eventId, pStreamName) {
-    const streamName = pStreamName || this.config.stream.name;
+  async xdel(eventId, stream) {
+    const streamName = stream || this.config.stream.name;
 
     return this.redis.xdel(streamName, eventId);
   }
@@ -119,12 +123,12 @@ class RedPop {
    * xadd -- adds an event to a redis stream
    *
    * @param {Object} event JSON object with key-value pairs.
-   * @param {String} pStreamName Optional stream name parameter
+   * @param {String} stream Optional stream name parameter
    *
    */
 
-  async xadd(event, pStreamName) {
-    const streamName = pStreamName || this.config.stream.name;
+  async xadd(event, stream) {
+    const streamName = stream || this.config.stream.name;
 
     const params = [];
     Object.keys(event).map(key => {
@@ -137,6 +141,16 @@ class RedPop {
   }
 
   /**
+   * xtrim -- calls xgtrim
+   * @param {String} params Array of parameters
+   */
+  async xtrim(maxLength, stream) {
+    const streamName = stream || this.config.stream.name;
+
+    return this.redis.xtrim(streamName, 'MAXLEN', maxLength);
+  }
+
+  /**
    * xreadgroup -- calls xreadgroup
    * @param {Object} params  JSON object with xreadgroup parameters
    */
@@ -146,10 +160,15 @@ class RedPop {
 
   /**
    * xack -- calls xack
-   * @param {String} params Array of parameters
+   * @eventId {String} eventId streamn_id to xack
+   * @group {string} (optional) consumer group name
+   * @stream {string} (optional) stream name
    */
-  async xack(...params) {
-    return this.redis.xack(...params);
+  async xack(eventId, group, stream) {
+    const streamName = stream || this.config.stream.name;
+    const groupName = group || this.config.consumer.group;
+
+    return this.redis.xack(streamName, groupName, eventId);
   }
 
   /**
@@ -158,6 +177,14 @@ class RedPop {
    */
   async xgroup(...params) {
     return this.redis.xgroup(...params);
+  }
+
+  /**
+   * xinfo -- calls xinfo
+   * @param {String} params Array of parameters
+   */
+  async xinfo(...params) {
+    return this.redis.xinfo(...params);
   }
 
   /**
@@ -176,14 +203,23 @@ class RedPop {
 
   /**
    * xclaim -- calls xpending
-   * @param {String} params Array of parameters
+   * @param {Array} eventIds Array of redis stream IDs
+   * @param {String} stream (optional) stream name
+   * @param {String} group (optional) consumer group name
+   * @param {String} consumer (optional) consumer name
+   * @param {Integer} timeoutMS (optional) timeout of idle event in MS
    */
-  async xclaim(...eventIds) {
+  async xclaim(eventIds, stream, group, consumer, timeoutMS) {
+    const streamName = stream || this.config.stream.name;
+    const groupName = group || this.config.consumer.group;
+    const consumerName = consumer || this.config.consumer.name;
+    const timeout = timeoutMS || this.config.consumer.pendingEventTimeoutMs;
+
     return this.redis.xclaim(
-      this.config.stream.name,
-      this.config.consumer.group,
-      this.config.consumer.name,
-      this.config.consumer.idleTimeoutEventMs,
+      streamName,
+      groupName,
+      consumerName,
+      timeout,
       ...eventIds
     );
   }

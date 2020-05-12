@@ -1,4 +1,9 @@
 const cloneDeep = require('lodash/cloneDeep');
+const BATCH_STREAM_NAME = 0;
+const BATCH_EVENTS = 1;
+const EVENT_ID = 0;
+const EVENT_PAYLOAD = 1;
+
 class EventBatch {
   constructor(events) {
     if (events[0]) {
@@ -15,10 +20,10 @@ class EventBatch {
    * @param {Object} eventBatch batch of events from ioredis
    */
   _loadEvents(eventBatch) {
-    this._streamName = eventBatch[0];
-    this._events = eventBatch[1].map(event => ({
-      id: event[0],
-      data: this._extractData(event[1])
+    this._streamName = eventBatch[BATCH_STREAM_NAME];
+    this._events = eventBatch[BATCH_EVENTS].map(event => ({
+      id: event[EVENT_ID],
+      data: this._extractData(event[EVENT_PAYLOAD])
     }));
   }
 
@@ -46,9 +51,8 @@ class EventBatch {
   }
 
   /**
-   * getStreamName -- returns this.events as an array of JSON objects
+   * getStreamName -- returns the stream name of the batch
    *
-   * @param {Array} dataArray - array of events
    */
   getStreamName() {
     return this._streamName;
