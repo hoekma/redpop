@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const PendingEvents = require('./PendingEvents');
-const Subscriber = require('..');
+const Consumer = require('..');
 const testConfig = require('../test/testConfig');
 const xreadgroupResponse = require('../test/xreadgroupResponse');
 const sinon = require('sinon');
@@ -21,7 +21,7 @@ describe('PendingEvents Unit Test', () => {
   let xackStub, xpendingStub, xclaimStub;
 
   beforeEach(() => {
-    xackStub = sandbox.stub(Subscriber.prototype, 'xack');
+    xackStub = sandbox.stub(Consumer.prototype, 'xack');
     xclaimStub = sandbox
       .stub(PendingEvents.prototype, 'xclaim')
       .resolves(xreadgroupResponse);
@@ -39,8 +39,8 @@ describe('PendingEvents Unit Test', () => {
     });
 
     it('removes events that have reached maximum retries', async () => {
-      const subscriber = new Subscriber(testConfig);
-      const pendingEvents = new PendingEvents(subscriber);
+      const consumer = new Consumer(testConfig);
+      const pendingEvents = new PendingEvents(consumer);
       pendingEvents._pendingEvents = events;
       await pendingEvents._removeMaxRetries();
       // this should remove the event with the 4 retries.
@@ -49,8 +49,8 @@ describe('PendingEvents Unit Test', () => {
     });
 
     it('processes pending events', async () => {
-      const subscriber = new Subscriber(testConfig);
-      const pendingEvents = new PendingEvents(subscriber);
+      const consumer = new Consumer(testConfig);
+      const pendingEvents = new PendingEvents(consumer);
       await pendingEvents.processPendingEvents();
       // this should process the remaining events.
       expect(xpendingStub.calledOnce, 'xpendingStub should be called').equals(
@@ -67,8 +67,8 @@ describe('PendingEvents Unit Test', () => {
     });
 
     it('handles an empty batch of  pending events', async () => {
-      const subscriber = new Subscriber(testConfig);
-      const pendingEvents = new PendingEvents(subscriber);
+      const consumer = new Consumer(testConfig);
+      const pendingEvents = new PendingEvents(consumer);
       await pendingEvents.processPendingEvents();
       // this should process the remaining events.
       expect(xpendingStub.calledOnce, 'xpendingStub should be called').equals(

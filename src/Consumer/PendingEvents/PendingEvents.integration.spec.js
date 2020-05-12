@@ -1,8 +1,8 @@
 const isEmpty = require('lodash/isEmpty');
 const { expect } = require('chai');
 const sandbox = require('sinon').createSandbox();
-const IdleConsumers = require('./IdleConsumers');
-const Subscriber = require('../Subscriber');
+const PendingEvents = require('./PendingEvents');
+const Consumer = require('../Consumer');
 const Publisher = require('../../Publisher');
 const RedPop = require('../../RedPop');
 const config = require('../test/testConfig');
@@ -16,7 +16,20 @@ const wait = ms => {
   }
 };
 
-describe('IdleConsumers Integration Tests', () => {
+// This is our consumer class for the tests
+class PendingMessageTestConsumer extends Consumer {
+  constructor(config) {
+    super(config);
+    this.sendxack = false;
+  }
+
+  async processEvent(event) {
+    // this should leave
+    return this.sendxack;
+  }
+}
+
+describe('PendingEvents Integration Tests', () => {
   beforeEach(async () => {
     // Make sure it's trimmed to 0 if it already existed
     const redPop = new RedPop(config);
@@ -51,45 +64,49 @@ describe('IdleConsumers Integration Tests', () => {
       config.stream.name,
       '>'
     );
+
+    const pendingMessages = await redPop.xpending();
+    expect(
+      isEmpty(pendingMessages),
+      'beforeEach - Pending messages should not exist'
+    ).equals(true);
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  describe('IdleConsumers - Postive Tests', () => {
-    it('removes an idle consumer', async () => {
+  describe('PendingEvents - Postive Tests', () => {
+    it('processes pending events', async () => {
       // Publish a message
       const publisher = new Publisher(config);
       await publisher.publish({ v: 'test' });
 
       // Let the consumer play the message
-      const consumer = new Subscriber(config);
+      const consumer = new PendingMessageTestConsumer(config);
       await consumer.start();
 
-      let consumers = await consumer.xinfo(
-        'CONSUMERS',
-        config.stream.name,
-        config.consumer.group
+      // Verify that there is a pending message
+      let pendingMessages = await consumer.xpending();
+      expect(isEmpty(pendingMessages), 'Pending messages should exist').equals(
+        false
       );
 
-      expect(isEmpty(consumers)).equals(false);
       // Wait for the pending message timeout to pass
-      wait(config.consumer.idleConsumerTimeoutMs + 100);
+      wait(config.consumer.pendingEventTimeoutMs + 100);
 
       // Now that we're set up, let's try to replay the message after
       // two seconds;
 
-      const pendingEvent = new IdleConsumers(consumer);
-      await pendingEvent.removeIdleConsumers();
+      consumer.sendxack = true; // Let it xack the message this time
+      const pendingEvent = new PendingEvents(consumer);
+      await pendingEvent.processPendingEvents();
+      pendingMessages = await consumer.xpending();
 
-      consumers = await consumer.xinfo(
-        'CONSUMERS',
-        config.stream.name,
-        config.consumer.group
-      );
-
-      expect(isEmpty(consumers.length)).equals(true);
+      expect(
+        isEmpty(pendingMessages),
+        'Pending messages should not exist'
+      ).equals(true);
     });
   });
 });

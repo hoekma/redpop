@@ -5,7 +5,7 @@ const isEmpty = require('lodash/isEmpty');
 const CONSUMER_NAME = 1;
 const CONSUMER_IDLE_MS = 5;
 
-// IdleSubscribers will query the active consumers for the consumer group
+// IdleConsumers will query the active consumers for the consumer group
 // and remove any consumers that have been idle for longer than
 // config.
 

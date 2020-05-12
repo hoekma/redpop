@@ -13,7 +13,7 @@ module.exports = {
     waitTimeMs: 1, // Time to wait for redis events per loop
     batchSize: 50, // Number of events to receive each loop
     pendingEventTimeoutMs: 500, // Time before event should be replayed
-    idleSubscriberTimeoutMs: 500, // Time before subscriber is de-registered
+    idleConsumerTimeoutMs: 500, // Time before consumer is de-registered
     eventMaximumReplays: 3
   },
   testing: true

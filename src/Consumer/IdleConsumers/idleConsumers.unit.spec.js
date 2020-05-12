@@ -1,14 +1,14 @@
 const { expect } = require('chai');
-const Subscriber = require('..');
+const Consumer = require('..');
 const IdleConsumers = require('.');
 const testConfig = require('../test/testConfig');
 const sandbox = require('sinon').createSandbox();
 
 describe('PendingEvents Unit Test', () => {
-  let xinfoStub, xgroupStub, subscriber;
+  let xinfoStub, xgroupStub, consumer;
 
   beforeEach(() => {
-    subscriber = new Subscriber(testConfig);
+    consumer = new Consumer(testConfig);
     xgroupStub = sandbox.stub(IdleConsumers.prototype, 'xgroup');
   });
 
@@ -25,7 +25,7 @@ describe('PendingEvents Unit Test', () => {
     });
 
     it('removes events that have reached maximum retries', async () => {
-      const idleConsumers = new IdleConsumers(subscriber);
+      const idleConsumers = new IdleConsumers(consumer);
       await idleConsumers.removeIdleConsumers();
       expect(xinfoStub.calledOnce, 'xinfoStub should be called').equals(true);
       expect(xgroupStub.calledOnce, 'xgroupStub should be called').equals(true);
@@ -39,7 +39,7 @@ describe('PendingEvents Unit Test', () => {
         .stub(IdleConsumers.prototype, 'xinfo')
         .resolves(consumers);
 
-      const idleConsumers = new IdleConsumers(subscriber);
+      const idleConsumers = new IdleConsumers(consumer);
       await idleConsumers.removeIdleConsumers();
       expect(xinfoStub.calledOnce, 'xinfoStub should be called').equals(true);
       expect(xgroupStub.calledOnce, 'xgroupStub should not be called').equals(
@@ -52,7 +52,7 @@ describe('PendingEvents Unit Test', () => {
         .stub(IdleConsumers.prototype, 'xinfo')
         .resolves(consumers);
 
-      const idleConsumers = new IdleConsumers(subscriber);
+      const idleConsumers = new IdleConsumers(consumer);
       await idleConsumers.removeIdleConsumers();
       expect(xinfoStub.calledOnce, 'xinfoStub should be called').equals(true);
       expect(xgroupStub.calledOnce, 'xgroupStub should not be called').equals(

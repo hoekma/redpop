@@ -9,18 +9,18 @@ const EVENT_ID = 0;
 const EVENT_REPLAY_COUNT = 3;
 
 // PendingEvents will search for events on the Redis stream
-// that were assigned to a subscriber, but never XACKs as complete.
-// This can happen if a subscriber is shut down while processing a batch
-// of events, the subscriber crashes and never XACKS
-// the event.  The subscriber settings define how long before it is assumed
+// that were assigned to a consumer, but never XACKs as complete.
+// This can happen if a consumer is shut down while processing a batch
+// of events, the consumer crashes and never XACKS
+// the event.  The consumer settings define how long before it is assumed
 // that the event should be replayed as well as how many times to replay
 // the event before deleteing the mssage from the bus (i.e. the event will
 // never successuflly run so stop retrying)
 
 class PendingEvents extends RedPop {
-  constructor(subscriber) {
-    super(subscriber.config);
-    this.subscriber = subscriber;
+  constructor(consumer) {
+    super(consumer.config);
+    this.consumer = consumer;
     this.pendingMessges = [];
   }
 
@@ -33,7 +33,7 @@ class PendingEvents extends RedPop {
       ) {
         // xack the event if it is past replays because there is
         // an error condition causing it to fail.
-        this.subscriber.xack(event[EVENT_ID]);
+        this.consumer.xack(event[EVENT_ID]);
         return false;
       } else {
         return true;
@@ -42,7 +42,7 @@ class PendingEvents extends RedPop {
   }
 
   async _replayIdleEvents() {
-    // The subscriber will claim the messages and attempt
+    // The consumer will claim the messages and attempt
     // to replay them as if they were a new batch that came in.
     if (this._pendingEvents.length > 0) {
       const pendingEventIds = this._pendingEvents.reduce((eventIds, event) => {
@@ -58,7 +58,7 @@ class PendingEvents extends RedPop {
         //
         const xreadFormat = [[this.config.stream.name, eventsToReplay]];
         const eventBatch = new EventBatch(xreadFormat);
-        this.subscriber._processEvents(eventBatch);
+        this.consumer._processEvents(eventBatch);
       }
     }
   }
@@ -70,7 +70,7 @@ class PendingEvents extends RedPop {
     this._pendingEvents = await this.xpending();
     await this._removeMaxRetries();
 
-    // Replay events that were claimed by a subscriber
+    // Replay events that were claimed by a consumer
     // but that were not xack'd before config.eventPendingTimeoutMs
 
     await this._replayIdleEvents();

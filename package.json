@@ -4,7 +4,7 @@
   "description": "Redis Streams Point of Presence",
   "main": "src/index.js",
   "scripts": {
-    "demoSubscriber": "nodemon src/demo/subscriber/subscriber.js",
+    "demoConsumer": "nodemon src/demo/consumer/consumer.js",
     "demoPublisher": "node src/demo/publisher/publisher.js",
     "demoReplay": "node src/demo/replay/replay.js",
     "start:dev": "nodemon src/index.js",

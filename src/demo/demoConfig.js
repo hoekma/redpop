@@ -13,7 +13,7 @@ module.exports = {
     waitTimeMs: 2000,
     batchSize: 50,
     pendingEventTimeoutMs: 10000,
-    idleSubscriberTimeoutMs: 10000,
+    idleConsumerTimeoutMs: 10000,
     eventMaximumReplays: 3
   }
 };

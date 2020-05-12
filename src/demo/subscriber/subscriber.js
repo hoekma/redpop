@@ -1,7 +1,7 @@
-const Subscriber = require('../../Subscriber');
+const Consumer = require('../../Consumer');
 const config = require('../demoConfig');
 
-class DemoSubscriber extends Subscriber {
+class DemoConsumer extends Consumer {
   constructor(config) {
     super(config);
     this.batchCount = 0;
@@ -38,7 +38,7 @@ class DemoSubscriber extends Subscriber {
     let successOrFail = true;
 
     if (this.calculateSuccessOrFail === true) {
-      // Simulate failed transactions by "failing" 10%.  Subscriber
+      // Simulate failed transactions by "failing" 10%.  Consumer
       // Should replay them after config.pendingEventTimeoutMs elapses.
       successOrFail = Math.round(Math.random() * 10) > 1;
     }
@@ -51,8 +51,8 @@ class DemoSubscriber extends Subscriber {
   }
 }
 
-const subscriber = new DemoSubscriber(config);
+const consumer = new DemoConsumer(config);
 
-console.info(`Starting Subscriber ${subscriber.config.consumer.name}`);
+console.info(`Starting Consumer ${consumer.config.consumer.name}`);
 console.info('Press ctrl-c to exit.');
-subscriber.start();
+consumer.start();

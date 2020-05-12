@@ -3,7 +3,7 @@ const defaultConfig = require('./config');
 const cloneDeep = require('lodash/cloneDeep');
 
 /**
- * Class RedPop -- Top level class from which subscribers and pubishers inherit
+ * Class RedPop -- Top level class from which consumers and pubishers inherit
  *              -- Handles all REDIS setup.
  *              -- RedPop also provides helper logic based on knowing the config
  *              -- context of sub-classes so it inverts some of the order of parameters
@@ -52,7 +52,7 @@ class RedPop {
   }
 
   /**
-   * setConfig -- Abstract method to do setup configuration (e.g. subscriber config)
+   * setConfig -- Abstract method to do setup configuration (e.g. consumer config)
    * Override in a subclass.
    */
 

@@ -7,13 +7,13 @@ const defaultConfig = require('./config');
 const cloneDeep = require('lodash/cloneDeep');
 
 /**
- * Subscriber is an abstract class that encapsulates
- * the functionalty to run a subscriber.  A subclass
+ * Consumer is an abstract class that encapsulates
+ * the functionalty to run a consumer.  A subclass
  * should extend this class and override the abstract
  * method(s).  At a minimum, processEvent should be extended.
  *
  */
-class Subscriber extends RedPop {
+class Consumer extends RedPop {
   constructor(config) {
     config = config || cloneDeep(defaultConfig);
     // process configuration in parent class RedPop
@@ -41,7 +41,7 @@ class Subscriber extends RedPop {
 
   /**
    * setConfig
-   * Sets subscriber specific configuration settings
+   * Sets consumer specific configuration settings
    */
   setConfig() {
     const consumer = this.config.consumer;
@@ -138,7 +138,7 @@ class Subscriber extends RedPop {
    * onBatchReceived()
    *   Process the new batch of events.
    *   this.processevents should be overridden in a
-   *   subclass of Subscriber
+   *   subclass of Consumer
    */
   async _onBatchReceived(eventBatch) {
     this.processing = true;
@@ -156,7 +156,7 @@ class Subscriber extends RedPop {
   /**
    * processPendingEvent()
    *   Process any events that were played by other
-   *   subscribers and didn't result in an xack.  This
+   *   consumers and didn't result in an xack.  This
    *   can happen if the subbscriber is terminated in
    *   the middle of processing an event or if an unhandled
    *   error occurs in the processEvent() call.
@@ -167,8 +167,8 @@ class Subscriber extends RedPop {
   }
 
   /**
-   * removeIdleSubscribers()
-   *   Remove subscribers that have been idle
+   * removeIdleConsumers()
+   *   Remove consumers that have been idle
    *   longer than config.consumer.idleConsumerTimeoutMs
    */
   async _removeIdleConsumers() {
@@ -215,4 +215,4 @@ class Subscriber extends RedPop {
   }
 }
 
-module.exports = Subscriber;
+module.exports = Consumer;

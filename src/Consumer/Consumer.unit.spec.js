@@ -10,14 +10,14 @@ const xreadgroupResponse = require('./test/xreadgroupResponse');
 
 const sandbox = sinon.createSandbox();
 
-describe('Subscriber Unit Tests', () => {
-  let Subscriber;
+describe('Consumer Unit Tests', () => {
+  let Consumer;
   let config;
   let xack;
   let pendingEventsStub;
 
   before(() => {
-    Subscriber = require('.');
+    Consumer = require('.');
   });
 
   beforeEach(() => {
@@ -36,110 +36,110 @@ describe('Subscriber Unit Tests', () => {
     sandbox.restore();
   });
 
-  describe('Subscriber Unit Tests - Positive', () => {
-    it('instantiates a subscriber', () => {
-      const subscriber = new Subscriber();
-      expect(subscriber.config).to.be.an('Object');
-      expect(subscriber.config.server.address).to.equal('localhost');
-      expect(subscriber.config.consumer.group).equals('consumerGroup');
+  describe('Consumer Unit Tests - Positive', () => {
+    it('instantiates a consumer', () => {
+      const consumer = new Consumer();
+      expect(consumer.config).to.be.an('Object');
+      expect(consumer.config.server.address).to.equal('localhost');
+      expect(consumer.config.consumer.group).equals('consumerGroup');
     });
 
     it('generates a unique consumer name', () => {
       const shortidStub = sandbox.stub(shortid, 'generate').returns('random');
-      const subscriber = new Subscriber(config);
+      const consumer = new Consumer(config);
       expect(
-        subscriber.config.consumer.name,
+        consumer.config.consumer.name,
         'Consumer name was not properly generated'
       ).equals(testConfig.consumer.name + '_random');
       expect(shortidStub.calledOnce).equals(true);
     });
 
     it('sets processing=false after _onBatchesComplete()', async () => {
-      const subscriber = new Subscriber(config);
-      subscriber.processing = true;
-      await subscriber._onBatchesComplete();
-      expect((subscriber.processing = false));
+      const consumer = new Consumer(config);
+      consumer.processing = true;
+      await consumer._onBatchesComplete();
+      expect((consumer.processing = false));
     });
 
     it('has abstract method processEvent', async () => {
-      const subscriber = new Subscriber(config);
-      const result = await subscriber.processEvent();
+      const consumer = new Consumer(config);
+      const result = await consumer.processEvent();
       expect(result).equals(true);
     });
 
     it('has abstract method afterBatchComplete', async () => {
-      const subscriber = new Subscriber(config);
-      const result = await subscriber.onBatchComplete();
+      const consumer = new Consumer(config);
+      const result = await consumer.onBatchComplete();
       expect(result).equals(true);
     });
 
     it('has abstract method afterBatchesComplete', async () => {
-      const subscriber = new Subscriber(config);
-      const result = await subscriber.onBatchesComplete();
+      const consumer = new Consumer(config);
+      const result = await consumer.onBatchesComplete();
       expect(result).equals(true);
     });
 
     it('runs _onBatchComplete()', async () => {
       const afterBatchComplete = sandbox.stub(
-        Subscriber.prototype,
+        Consumer.prototype,
         'onBatchComplete'
       );
-      const subscriber = new Subscriber(config);
-      await subscriber._onBatchComplete();
+      const consumer = new Consumer(config);
+      await consumer._onBatchComplete();
       expect(afterBatchComplete.calledOnce).equals(true);
     });
 
     it('runs onBatchComplete()', async () => {
-      const subscriber = new Subscriber(config);
-      await subscriber.onBatchComplete();
+      const consumer = new Consumer(config);
+      await consumer.onBatchComplete();
     });
 
     it('runs _processEvents', async () => {
-      const subscriber = new Subscriber(config);
+      const consumer = new Consumer(config);
       const eventBatch = new EventBatch(xreadgroupResponse);
-      await subscriber._processEvents(eventBatch);
+      await consumer._processEvents(eventBatch);
       expect(xack.calledOnce).equals(true);
     });
 
     it('runs _onBatchReceived', async () => {
-      const subscriber = new Subscriber(config);
+      const consumer = new Consumer(config);
       const eventBatch = new EventBatch(xreadgroupResponse);
-      await subscriber._onBatchReceived(eventBatch);
+      await consumer._onBatchReceived(eventBatch);
       expect(xack.calledOnce).equals(true);
     });
 
     it('runs _init', async () => {
-      const initStub = sandbox.stub(Subscriber.prototype, 'init');
+      const initStub = sandbox.stub(Consumer.prototype, 'init');
       const xgroupStub = sandbox.stub(RedPop.prototype, 'xgroup');
-      const subscriber = new Subscriber(config);
-      await subscriber._init();
+      const consumer = new Consumer(config);
+      await consumer._init();
       expect(initStub.calledOnce).equals(true);
       expect(xgroupStub.calledOnce).equals(true);
     });
 
     it('runs abstract method init', async () => {
-      const subscriber = new Subscriber(config);
-      await subscriber.init();
+      const consumer = new Consumer(config);
+      await consumer.init();
     });
 
-    it('starts the subscriber and plays an event', async () => {
+    it('starts the consumer and plays an event', async () => {
       const xreadgroup = sandbox
         .stub(RedPop.prototype, 'xreadgroup')
         .resolves(xreadgroupResponse);
       const xgroupStub = sandbox.stub(RedPop.prototype, 'xgroup');
-      const subscriber = new Subscriber(config);
-      await subscriber.start();
+      const consumer = new Consumer(config);
+      await consumer.start();
       expect(xreadgroup.calledOnce).equals(true);
       expect(xgroupStub.calledOnce).equals(true);
     });
 
-    it('starts the subscriber and completes batches', async () => {
+    it('starts the consumer and completes batches', async () => {
       const xreadgroupStub = sandbox
         .stub(RedPop.prototype, 'xreadgroup')
         .resolves(null);
       const xgroupStub = sandbox.stub(RedPop.prototype, 'xgroup');
-      const subscriber = new Subscriber(config);
-      await subscriber.start();
+      const consumer = new Consumer(config);
+      await consumer.start();
       expect(
         xreadgroupStub.calledOnce,
         'xreadgroup should have been called'
