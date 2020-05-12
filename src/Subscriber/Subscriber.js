@@ -150,7 +150,6 @@ class Subscriber extends RedPop {
    *   Perform any batch-specific post-processing
    */
   async _onBatchComplete() {
-    console.info('Current Batch Complete');
     await this.onBatchComplete();
   }
 

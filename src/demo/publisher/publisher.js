@@ -1,19 +1,9 @@
 const Publisher = require('../../Publisher');
 const event = require('./publishData');
-
-const config = {
-  server: {
-    address: 'localhost',
-    port: 6379,
-    connectionType: 'standalone'
-  },
-  stream: {
-    name: 'redpopdemo'
-  }
-};
+const config = require('../demoConfig');
 
 const publisher = new Publisher(config);
-const iterations = 50;
+const iterations = 20000;
 
 (async () => {
   let i;

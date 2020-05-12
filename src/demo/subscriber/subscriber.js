@@ -1,5 +1,5 @@
 const Subscriber = require('../../Subscriber');
-const config = require('./demoConfig');
+const config = require('../demoConfig');
 
 class DemoSubscriber extends Subscriber {
   constructor(config) {
@@ -22,6 +22,8 @@ class DemoSubscriber extends Subscriber {
     if (this.eventCountAllBatches > 0) {
       // after the initial batch, don't simulate a failure rate
       this.calculateSuccessOrFail = false;
+      // It is possible that this will run before a batch count is established.
+      this.batchCount = this.batchCount === 0 ? 1 : this.batchCount;
       console.info(
         `Processed ${this.eventCountAllBatches} events in ${this.batchCount} batches`
       );
@@ -33,15 +35,17 @@ class DemoSubscriber extends Subscriber {
   }
 
   async processEvent(event) {
-    this.eventCountCurrentBatch++;
-    this.eventCountAllBatches++;
-
     let successOrFail = true;
 
     if (this.calculateSuccessOrFail === true) {
       // Simulate failed transactions by "failing" 10%.  Subscriber
       // Should replay them after config.pendingEventTimeoutMs elapses.
-      successOrFail = Math.round(Math.random() * 10) === 10;
+      successOrFail = Math.round(Math.random() * 10) > 1;
+    }
+
+    if (successOrFail) {
+      this.eventCountCurrentBatch++;
+      this.eventCountAllBatches++;
     }
     return successOrFail;
   }
@@ -49,6 +53,6 @@ class DemoSubscriber extends Subscriber {
 
 const subscriber = new DemoSubscriber(config);
 
-console.info('Starting Subscriber.');
+console.info(`Starting Subscriber ${subscriber.config.consumer.name}`);
 console.info('Press ctrl-c to exit.');
 subscriber.start();

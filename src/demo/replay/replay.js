@@ -1,5 +1,5 @@
 const RedPop = require('../../RedPop');
-const config = require('./config');
+const config = require('../demoConfig');
 
 const redPop = new RedPop(config);
 const BEGIN = '0'; // Sets stream pointer to the beginning
