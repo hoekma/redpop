@@ -54,7 +54,7 @@ Ready-Made Redis Streams Consumer and Publisher
         batchSize: 50
         // How many times does an event get replayed before the event is discarded (default 3)
         // This will discard an event if it is erroring out repeatedly
-        eventMaximumReplays: 3
+        eventMaximumReplays: 4
     }
 }
 ```
