@@ -25,7 +25,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - run: docker ps -a
     - run: npm ci
     - run: npm run build --if-present
+    - run: docker run --name redis --rm -d redis
     - run: npm test
+    - run: docker kill redis
