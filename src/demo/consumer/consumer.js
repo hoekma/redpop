@@ -36,7 +36,6 @@ class DemoConsumer extends Consumer {
 
   async processEvent(event) {
     let successOrFail = true;
-
     if (this.calculateSuccessOrFail === true) {
       // Simulate failed transactions by "failing" 10%.  Consumer
       // Should replay them after config.pendingEventTimeoutMs elapses.
