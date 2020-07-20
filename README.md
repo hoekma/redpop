@@ -135,7 +135,7 @@ A simple consumer need only include this:
 ```javascript
     const { Consumer } = require('@hoekma/redpop');
 
-    processEvent(event) {
+    async processEvent(event) {
         const myEventId = event.id
         const myEventPayload = event.data
         doSomethingWith(myEventPayload);
@@ -204,14 +204,14 @@ class AuthInitPwdResetConsumer extends Consumer {
     this.adminNotifyStream = 'adminNotifierStream'
   }
 
-  onBatchesComplete() {
+  async onBatchesComplete() {
     // Runs after each batch is complete.  For example
     // stream receives 500 messages and config.batchSize=50
     // this will run after 10 batches of messages.
     this.passwordsReset = 0;
   }
 
-  onBatchComplete() {
+  async onBatchComplete() {
     // Runs after each batch is complete.  For example
     // stream receives 500 messages and config.batchSize=50
     // this will run after each batch of 50 messages.
@@ -219,7 +219,7 @@ class AuthInitPwdResetConsumer extends Consumer {
     await this.xadd(notifyAdmins, this.adminNotifyStream);  
   }
 
-  processEvent(event) {
+  async processEvent(event) {
     const resetCode = storePaswordResetCode(event.data.user);
     const emailPublisher = new Publisher(this.config)
     
