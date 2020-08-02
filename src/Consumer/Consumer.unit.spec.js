@@ -1,14 +1,12 @@
 const { expect } = require('chai');
 const shortid = require('shortid');
 const cloneDeep = require('lodash/cloneDeep');
-const sinon = require('sinon');
+const sandbox = require('sinon').createSandbox();
 const RedPop = require('../RedPop');
 const EventBatch = require('./EventBatch');
 const PendingEvents = require('./PendingEvents');
 const testConfig = require('./test/testConfig');
 const xreadgroupResponse = require('./test/xreadgroupResponse');
-
-const sandbox = sinon.createSandbox();
 
 describe('Consumer Unit Tests', () => {
   let Consumer;
