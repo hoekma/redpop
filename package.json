@@ -1,6 +1,6 @@
 {
   "name": "@hoekma/redpop",
-  "version": "0.0.2-alpha.5",
+  "version": "0.0.2-alpha.6",
   "description": "Redis Streams Point of Presence",
   "main": "src/index.js",
   "scripts": {
