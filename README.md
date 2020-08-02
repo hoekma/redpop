@@ -66,6 +66,8 @@ Using RedPop to publish a message, you send it an object which is a key-value pa
 
 ## Example 1:
 
+Simple example of publishing a message to the stream defined in `config.js`
+
 ```javascript
     const { Publisher } = require('@hoekma/redpop');
     const config = require('./config'); // contains RedPop config file
@@ -86,16 +88,18 @@ The consumer's processMessage might look like this:
 
 ## Example 2:
 
+Publish a more complex message to a specific stream, overriding the stream name in `config.js`.  Why overrid the config file?   Well, if your consumer wants to republish a message to a different stream.  You may wantto do this, for instance, for logging, sending a notification, or publishing a new version of data to a different consumer as a part of a transformation pipeline.
+
 ```javascript
     const { Publisher } = require('@hoekma/redpop');
     const config = require('./config');  // contains RedPop config file. See Aboves
     const publisher = new Publisher();
-
+    const streamName = 'someOtherStream';
     const message =
         { action: 'save',
-          payload: {id: 1234, name: 'John Doe'}}
+          payload: {id: 1234, name: 'John Doe'}}s
         };
-    publisher.publish(message)
+    publisher.publish(message, streamName)
 
 ```
 
@@ -190,7 +194,7 @@ onBatchesComplete() runs when the consumer finishes processing all batches of me
 
 #### Example consumer with advanced processing: 
 
-In the following example, we have a subscriber that listens for passord reset request events.  When it receives one, it will generate a reset code, sent a notification to the user via EMAIL and SMS (via another event stream).  It keeps track of how many resets it has processed and sends a notification to the admin group (via yet another event stream).  This uses the `this.xadd()` method of redpop to override the local config's stream name. 
+In the following example, we have a subscriber that listens for passord reset request events.  When it receives one, it will generate a reset code, sent a notification to the user via EMAIL and SMS (via another event stream).  It keeps track of how many resets it has processed and sends a notification to the admin group (via yet another event stream).  
 
 ```javascript
 const { Consumer } = require('@hoekma/redpop');
@@ -216,7 +220,7 @@ class AuthInitPwdResetConsumer extends Consumer {
     // stream receives 500 messages and config.batchSize=50
     // this will run after each batch of 50 messages.
     const event = {method: 'email', email: 'admin@yourcompany.com', passwordsReset: this.passwordsReset};
-    await this.xadd(notifyAdmins, this.adminNotifyStream);  
+    await this.publish(event, this.adminNotifyStream);  
   }
 
   async processEvent(event) {
@@ -231,8 +235,8 @@ class AuthInitPwdResetConsumer extends Consumer {
     // The assumption here is that we have a different Consumer instance listening to the other
     // stream and it knows how to send email and sms notifications.   This way we can chain the event
     // processors to handle discrete tasks in response to a user requesting a password reset code.
-    await this.xadd(eventToPublish1, this.notificationStream);  
-    await this.xadd(eventToPublish2, this.notificationStream); 
+    await this.publish(eventToPublish1, this.notificationStream);  
+    await this.publish(eventToPublish2, this.notificationStream); 
 
     // This value will persist until it is reset
     this.passwordsReset += 1;
