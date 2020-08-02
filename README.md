@@ -66,6 +66,8 @@ Using RedPop to publish a message, you send it an object which is a key-value pa
 
 ## Example 1:
 
+Simple example of publishing a message to the stream defined in `config.js`
+
 ```javascript
     const { Publisher } = require('@hoekma/redpop');
     const config = require('./config'); // contains RedPop config file
@@ -86,16 +88,18 @@ The consumer's processMessage might look like this:
 
 ## Example 2:
 
+Publish a more complex message to a specific stream, overriding the stream name in `config.js`.  Why overrid the config file?   Well, if your consumer wants to republish a message to a different stream.  You may wantto do this, for instance, for logging, sending a notification, or publishing a new version of data to a different consumer as a part of a transformation pipeline.
+
 ```javascript
     const { Publisher } = require('@hoekma/redpop');
     const config = require('./config');  // contains RedPop config file. See Aboves
     const publisher = new Publisher();
-
+    const streamName = 'someOtherStream';
     const message =
         { action: 'save',
-          payload: {id: 1234, name: 'John Doe'}}
+          payload: {id: 1234, name: 'John Doe'}}s
         };
-    publisher.publish(message)
+    publisher.publish(message, streamName)
 
 ```
 
