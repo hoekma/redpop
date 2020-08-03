@@ -24,7 +24,7 @@ describe('PendingEvents Unit Test', () => {
     xackStub = sandbox.stub(Consumer.prototype, 'xack');
     xclaimStub = sandbox
       .stub(PendingEvents.prototype, 'xclaim')
-      .resolves(xreadgroupResponse);
+      .resolves(xreadgroupResponse[0][1]);
   });
 
   afterEach(() => {
@@ -43,6 +43,7 @@ describe('PendingEvents Unit Test', () => {
       const pendingEvents = new PendingEvents(consumer);
       pendingEvents._pendingEvents = events;
       await pendingEvents._removeMaxRetries();
+
       // this should remove the event with the 4 retries.
       expect(pendingEvents._pendingEvents.length).equals(7);
       expect(xackStub.calledOnce).equals(true);
@@ -59,6 +60,7 @@ describe('PendingEvents Unit Test', () => {
       expect(xclaimStub.calledOnce, 'xclaimStub should be called').equals(true);
     });
   });
+
   describe('PendingEvents - Negative Tests', () => {
     beforeEach(() => {
       xpendingStub = sandbox

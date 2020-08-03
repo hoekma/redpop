@@ -5,6 +5,7 @@ const sandbox = require('sinon').createSandbox();
 const RedPop = require('../RedPop');
 const EventBatch = require('./EventBatch');
 const PendingEvents = require('./PendingEvents');
+const IdleConsumers = require('./IdleConsumers');
 const testConfig = require('./test/testConfig');
 const xreadgroupResponse = require('./test/xreadgroupResponse');
 
@@ -131,15 +132,18 @@ describe('Consumer Unit Tests', () => {
       expect(xgroupStub.calledOnce).equals(true);
     });
 
-    it.skip('starts the consumer and completes batches', async () => {
-      const xreadgroupStub = sandbox
+    it('starts the consumer and completes batches', async () => {
+      const xreadgroup = sandbox
         .stub(RedPop.prototype, 'xreadgroup')
         .resolves(null);
       const xgroupStub = sandbox.stub(RedPop.prototype, 'xgroup');
+      const idleConsumerStub = sandbox
+        .stub(IdleConsumers.prototype, 'removeIdleConsumers')
+        .resolves(null);
       const consumer = new Consumer(config);
       await consumer.start();
       expect(
-        xreadgroupStub.calledOnce,
+        xreadgroup.calledOnce,
         'xreadgroup should have been called'
       ).equals(true);
       expect(
@@ -149,6 +153,10 @@ describe('Consumer Unit Tests', () => {
       expect(
         pendingEventsStub.calledOnce,
         'pendingEventsStub should have been called'
+      ).equals(true);
+      expect(
+        idleConsumerStub.calledOnce,
+        'idleConsumerStub should have been called'
       ).equals(true);
     });
   });

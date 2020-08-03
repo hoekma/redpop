@@ -3,6 +3,7 @@ const BATCH_STREAM_NAME = 0;
 const BATCH_EVENTS = 1;
 const EVENT_ID = 0;
 const EVENT_PAYLOAD = 1;
+const dateRegEx = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
 
 class EventBatch {
   constructor(events) {
@@ -36,7 +37,18 @@ class EventBatch {
   _extractData(dataArray) {
     const dataObject = {};
     for (let dataIndex = 0; dataIndex < dataArray.length; dataIndex += 2) {
-      dataObject[dataArray[dataIndex]] = dataArray[dataIndex + 1];
+      const data = dataArray[dataIndex + 1];
+      try {
+        // try to decode json if possible. Does not work on dates.
+        dataObject[dataArray[dataIndex]] = JSON.parse(data);
+      } catch (e) {
+        if (data.match(dateRegEx)) {
+          dataObject[dataArray[dataIndex]] = new Date(Date.parse(data));
+        } else {
+          // just take the value if JSON.parse date fails.
+          dataObject[dataArray[dataIndex]] = dataArray[dataIndex + 1];
+        }
+      }
     }
     return dataObject;
   }

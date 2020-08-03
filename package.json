@@ -1,6 +1,6 @@
 {
   "name": "@hoekma/redpop",
-  "version": "0.0.2-alpha.6",
+  "version": "0.1.0-alpha.7",
   "description": "Redis Streams Point of Presence",
   "main": "src/index.js",
   "scripts": {
@@ -17,7 +17,11 @@
   },
   "keywords": [
     "redis",
-    "streams"
+    "streams",
+    "esb",
+    "bus",
+    "event",
+    "message"
   ],
   "author": "HoekTek, LLC",
   "license": "MIT",
@@ -34,6 +38,7 @@
     "assert": "^2.0.0",
     "babel-eslint": "^10.1.0",
     "chai": "^4.2.0",
+    "chai-datetime": "^1.7.0",
     "eslint": "^6.8.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.20.2",
