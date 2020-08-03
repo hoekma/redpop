@@ -68,7 +68,7 @@ describe('PendingEvents Integration Tests', () => {
     const pendingMessages = await redPop.xpending();
     expect(
       isEmpty(pendingMessages),
-      'beforeEach - Pending messages should not exist'
+      'beforeEach - Pending events should not exist'
     ).equals(true);
   });
 
@@ -88,7 +88,7 @@ describe('PendingEvents Integration Tests', () => {
 
       // Verify that there is a pending message
       let pendingMessages = await consumer.xpending();
-      expect(isEmpty(pendingMessages), 'Pending messages should exist').equals(
+      expect(isEmpty(pendingMessages), 'Pending events should exist').equals(
         false
       );
 
@@ -105,7 +105,7 @@ describe('PendingEvents Integration Tests', () => {
 
       expect(
         isEmpty(pendingMessages),
-        'Pending messages should not exist'
+        'Pending events should not exist'
       ).equals(true);
     });
   });
