@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const shortid = require('shortid');
+const nanoid = require('nanoid');
 const cloneDeep = require('lodash/cloneDeep');
 const sandbox = require('sinon').createSandbox();
 const RedPop = require('../RedPop');
@@ -43,14 +43,14 @@ describe('Consumer Unit Tests', () => {
       expect(consumer.config.consumer.group).equals('consumerGroup');
     });
 
-    it('generates a unique consumer name', () => {
-      const shortidStub = sandbox.stub(shortid, 'generate').returns('random');
+    it.only('generates a unique consumer name', () => {
+      const nanoidStub = sandbox.stub(nanoid, 'nanoid').returns('random');
       const consumer = new Consumer(config);
       expect(
         consumer.config.consumer.name,
         'Consumer name was not properly generated'
       ).equals(testConfig.consumer.name + '_random');
-      expect(shortidStub.calledOnce).equals(true);
+      expect(nanoidStub.calledOnce).equals(true);
     });
 
     it.skip('sets processing=false after _onBatchesComplete()', async () => {

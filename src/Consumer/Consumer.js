@@ -2,7 +2,7 @@ const RedPop = require('../RedPop');
 const EventBatch = require('./EventBatch/EventBatch');
 const PendingEvents = require('./PendingEvents');
 const IdleConsumers = require('./IdleConsumers');
-const shortid = require('shortid');
+const nanoid = require('nanoid');
 const defaultConfig = require('./config');
 const cloneDeep = require('lodash/cloneDeep');
 
@@ -47,7 +47,7 @@ class Consumer extends RedPop {
     const consumer = this.config.consumer;
     const defConsumer = defaultConfig.consumer;
 
-    consumer.name = this.config.consumer.name + '_' + shortid.generate();
+    consumer.name = this.config.consumer.name + '_' + nanoid.nanoid();
     consumer.waitTimeMs = consumer.waitTimeMs || defConsumer.waitTimeMs;
     consumer.batchSize = consumer.batchSize || defConsumer.batchSize;
     consumer.idleTimeoutMs = consumer.idleTimeoutMs || defConsumer.batchSize;
