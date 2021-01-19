@@ -71,7 +71,7 @@ Simple example of publishing a message to the stream defined in `config.js`
 ```javascript
     const { Publisher } = require('@hoekma/redpop');
     const config = require('./config'); // contains RedPop config file
-    const publisher = new Publisher();
+    const publisher = new Publisher(config);
 
     const message = { id: 1234, name: 'John Doe' };
     publisher.publish(message);
@@ -93,7 +93,7 @@ Publish a more complex message to a specific stream, overriding the stream name 
 ```javascript
     const { Publisher } = require('@hoekma/redpop');
     const config = require('./config');  // contains RedPop config file. See Aboves
-    const publisher = new Publisher();
+    const publisher = new Publisher(config);
     const streamName = 'someOtherStream';
     const message =
         { action: 'save',
