@@ -55,7 +55,10 @@ RedPop is a pre-baked Redis 5+ consumer and publisher library for Nodejs.  Use i
         // How many times does an event get replayed before the event is discarded (default 3)
         // This will discard an event if it is erroring out repeatedly
         eventMaximumReplays: 4
-    }
+    },
+     // How many times to poll for messages.  If true, it will poll once and exit, otherwise it will 
+     // poll indefinitely until the process is shut down.  Used to create loops that control multiple consumers.
+    runOnce: true
 }
 
 ```

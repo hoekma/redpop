@@ -7,7 +7,7 @@ const EventBatch = require('./EventBatch');
 const PendingEvents = require('./PendingEvents');
 const IdleConsumers = require('./IdleConsumers');
 const testConfig = require('./test/testConfig');
-const xreadgroupResponse = require('./test/xreadgroupResponse');
+const xreadgroupResponse = require('./test/xreadgroupResponse.mock');
 
 describe('Consumer Unit Tests', () => {
   let Consumer;
@@ -43,7 +43,7 @@ describe('Consumer Unit Tests', () => {
       expect(consumer.config.consumer.group).equals('consumerGroup');
     });
 
-    it.only('generates a unique consumer name', () => {
+    it('generates a unique consumer name', () => {
       const nanoidStub = sandbox.stub(nanoid, 'nanoid').returns('random');
       const consumer = new Consumer(config);
       expect(

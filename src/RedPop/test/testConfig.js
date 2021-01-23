@@ -16,5 +16,5 @@ module.exports = {
     idleConsumerTimeoutMs: 500, // Time before consumer is de-registered
     eventMaximumReplays: 3
   },
-  testing: true
+  runOnce: true
 };
