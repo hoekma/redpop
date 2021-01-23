@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const PendingEvents = require('./PendingEvents');
 const Consumer = require('..');
 const testConfig = require('../test/testConfig');
-const xreadgroupResponse = require('../test/xreadgroupResponse');
+const xreadgroupResponse = require('../test/xreadgroupResponse.mock');
 const sinon = require('sinon');
 const sandbox = sinon.createSandbox();
 
