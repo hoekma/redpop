@@ -7,5 +7,5 @@ module.exports = {
   stream: {
     name: 'redpop'
   },
-  testing: true
+  runOnce: true
 };

@@ -109,7 +109,7 @@ class Consumer extends RedPop {
         await this._onBatchComplete();
       }
 
-      if (this.config.testing) {
+      if (this.config.runOnce) {
         // used for tests to break out of the loop
         // normally this loop never ends until the
         // process is terminated.
