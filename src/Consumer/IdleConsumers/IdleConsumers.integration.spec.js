@@ -59,11 +59,11 @@ describe('IdleConsumers Integration Tests', () => {
 
   describe('IdleConsumers - Postive Tests', () => {
     it('removes an idle consumer', async () => {
-      // Publish a message
+      // Publish an event
       const publisher = new Publisher(config);
       await publisher.publish({ v: 'test' });
 
-      // Let the consumer play the message
+      // Let the consumer play the event
       const consumer = new Consumer(config);
       await consumer.start();
 
@@ -74,10 +74,10 @@ describe('IdleConsumers Integration Tests', () => {
       );
 
       expect(isEmpty(consumers)).equals(false);
-      // Wait for the pending message timeout to pass
+      // Wait for the pending event timeout to pass
       wait(config.consumer.idleConsumerTimeoutMs + 100);
 
-      // Now that we're set up, let's try to replay the message after
+      // Now that we're set up, let's try to replay the event after
       // two seconds;
 
       const pendingEvent = new IdleConsumers(consumer);

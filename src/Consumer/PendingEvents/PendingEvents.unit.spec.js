@@ -1,6 +1,8 @@
 const { expect } = require('chai');
 const PendingEvents = require('./PendingEvents');
 const Consumer = require('..');
+const RedPop = require('../../RedPop');
+
 const testConfig = require('../test/testConfig');
 const xreadgroupResponse = require('../test/xreadgroupResponse.mock');
 const sinon = require('sinon');
@@ -22,8 +24,9 @@ describe('PendingEvents Unit Test', () => {
 
   beforeEach(() => {
     xackStub = sandbox.stub(Consumer.prototype, 'xack');
+    sandbox.stub(Consumer.prototype, 'xgroup').resolves({});
     xclaimStub = sandbox
-      .stub(PendingEvents.prototype, 'xclaim')
+      .stub(RedPop.prototype, 'xclaim')
       .resolves(xreadgroupResponse[0][1]);
   });
 
@@ -34,7 +37,7 @@ describe('PendingEvents Unit Test', () => {
   describe('PendingEvents - Postive Tests', () => {
     beforeEach(() => {
       xpendingStub = sandbox
-        .stub(PendingEvents.prototype, 'xpending')
+        .stub(RedPop.prototype, 'xpending')
         .resolves(events);
     });
 
@@ -63,9 +66,7 @@ describe('PendingEvents Unit Test', () => {
 
   describe('PendingEvents - Negative Tests', () => {
     beforeEach(() => {
-      xpendingStub = sandbox
-        .stub(PendingEvents.prototype, 'xpending')
-        .resolves([]);
+      xpendingStub = sandbox.stub(RedPop.prototype, 'xpending').resolves([]);
     });
 
     it('handles an empty batch of  pending events', async () => {

@@ -1,4 +1,3 @@
-const RedPop = require('../../RedPop');
 const isEmpty = require('lodash/isEmpty');
 
 // Array element numbers to make the redis responses easier to understand
@@ -9,18 +8,17 @@ const CONSUMER_IDLE_MS = 5;
 // and remove any consumers that have been idle for longer than
 // config.
 
-class IdleConsumers extends RedPop {
+class IdleConsumers {
   constructor(consumer) {
-    super(consumer.config);
     this.consumer = consumer;
+    this.config = this.consumer.config;
   }
 
   async removeIdleConsumers() {
     // Retrieve pending events
     // Discard pendingEvents that have been retried config.eventMaximumReplays
-
     const idleTimeout = this.config.consumer.idleConsumerTimeoutMs;
-    const consumers = await this.xinfo(
+    const consumers = await this.consumer.xinfo(
       'CONSUMERS',
       this.config.stream.name,
       this.config.consumer.group
@@ -30,7 +28,7 @@ class IdleConsumers extends RedPop {
       Promise.all(
         consumers.filter(async consumer => {
           if (consumer[CONSUMER_IDLE_MS] > idleTimeout) {
-            await this.xgroup(
+            await this.consumer.xgroup(
               'DELCONSUMER',
               this.config.stream.name,
               this.config.consumer.group,

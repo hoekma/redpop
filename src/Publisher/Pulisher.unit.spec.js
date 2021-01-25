@@ -1,13 +1,13 @@
 const { expect } = require('chai');
 const sandbox = require('sinon').createSandbox();
 const Publisher = require('.');
-describe('Pulisher Unit Tests', () => {
+describe('Publisher Unit Tests', () => {
   let xaddStub;
-  let message;
+  let event;
 
   before(() => {
-    message = {
-      message: 'message'
+    event = {
+      event: 'event'
     };
     xaddStub = sandbox
       .stub(Publisher.prototype, 'xadd')
@@ -17,18 +17,18 @@ describe('Pulisher Unit Tests', () => {
   it('instantiates a publisher', () => {
     const publisher = new Publisher();
     expect(publisher.config).to.be.an('Object');
-    expect(publisher.config.server.address).to.equal('localhost');
+    expect(publisher.config.server.connection.host).to.equal('localhost');
   });
-  it('publishes a message with the default stream', async () => {
+  it('publishes a event with the default stream', async () => {
     const publisher = new Publisher();
-    const messageId = await publisher.publish(message);
-    expect(messageId.length).equals(15);
-    sandbox.assert.calledWith(xaddStub, message, publisher.config.stream.name);
+    const eventId = await publisher.publish(event);
+    expect(eventId.length).equals(15);
+    sandbox.assert.calledWith(xaddStub, event, publisher.config.stream.name);
   });
-  it('publishes a message to a spefific stream', async () => {
+  it('publishes a event to a spefific stream', async () => {
     const publisher = new Publisher();
-    const messageId = await publisher.publish(message, 'testStream');
-    expect(messageId.length).equals(15);
-    sandbox.assert.calledWith(xaddStub, message, 'testStream');
+    const eventId = await publisher.publish(event, 'testStream');
+    expect(eventId.length).equals(15);
+    sandbox.assert.calledWith(xaddStub, event, 'testStream');
   });
 });

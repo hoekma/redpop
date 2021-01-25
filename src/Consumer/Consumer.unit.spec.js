@@ -53,7 +53,7 @@ describe('Consumer Unit Tests', () => {
       expect(nanoidStub.calledOnce).equals(true);
     });
 
-    it.skip('sets processing=false after _onBatchesComplete()', async () => {
+    it('sets processing=false after _onBatchesComplete()', async () => {
       const consumer = new Consumer(config);
       consumer.processing = true;
       await consumer._onBatchesComplete();

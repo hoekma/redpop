@@ -38,15 +38,17 @@ describe('RedPop Unit Tests', () => {
   it('instantiates without a config parameter', () => {
     const redPop = new RedPop();
     expect(redPop.config).is.an('Object');
-    expect(redPop.config.server.address).equals('localhost');
+    expect(redPop.config.server.connection.host).equals('localhost');
   });
 
-  it('instantiates with a config parameter', () => {
+  it('instantiates with a config parameter in standalone mode', () => {
     const config = {
       server: {
-        address: 'someAddress',
-        type: 'cluster',
-        port: 9999
+        connectionType: 'standalone',
+        connection: {
+          host: '127.0.0.1',
+          port: 6379
+        }
       },
       stream: {
         name: 'someStream'
@@ -54,9 +56,32 @@ describe('RedPop Unit Tests', () => {
     };
     const redPop = new RedPop(config);
     expect(redPop.config).is.an('Object');
-    expect(redPop.config.server.address).equals('someAddress');
-    expect(redPop.config.server.port).equals(9999);
-    expect(redPop.config.server.type).equals('cluster');
+    expect(redPop.config.server.connection.host).equals('127.0.0.1');
+    expect(redPop.config.server.connection.port).equals(6379);
+    expect(redPop.config.server.connectionType).equals('standalone');
+    expect(redPop.config.stream.name).equals('someStream');
+  });
+
+  it('instantiates with a config parameter in cluster mode', () => {
+    const config = {
+      server: {
+        connectionType: 'cluster',
+        connections: [
+          {
+            host: '127.0.0.1',
+            port: 7000
+          }
+        ]
+      },
+      stream: {
+        name: 'someStream'
+      }
+    };
+    const redPop = new RedPop(config);
+    expect(redPop.config).is.an('Object');
+    expect(redPop.config.server.connections[0].host).equals('127.0.0.1');
+    expect(redPop.config.server.connections[0].port).equals(7000);
+    expect(redPop.config.server.connectionType).equals('cluster');
     expect(redPop.config.stream.name).equals('someStream');
   });
 
@@ -109,10 +134,9 @@ describe('RedPop Unit Tests', () => {
   });
 
   it('calls xclaim', async () => {
-    const config = require('./test/testConfig');
-    const redPop = new RedPop(config);
-    const xclaimedMessages = await redPop.xclaim([12345]);
+    const redPop = new RedPop();
+    const xclaimedEvents = await redPop.xclaim([12345]);
     expect(xclaimStub.calledOnce).equals(true);
-    expect(Array.isArray(xclaimedMessages)).equals(true);
+    expect(Array.isArray(xclaimedEvents)).equals(true);
   });
 });
