@@ -54,6 +54,8 @@ describe('Consumer Unit Tests', () => {
     });
 
     it('sets processing=false after _onBatchesComplete()', async () => {
+      sandbox.stub(Consumer.prototype, '_processPendingEvents');
+      sandbox.stub(Consumer.prototype, '_removeIdleConsumers');
       const consumer = new Consumer(config);
       consumer.processing = true;
       await consumer._onBatchesComplete();
