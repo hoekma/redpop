@@ -36,7 +36,7 @@ describe('Consumer Unit Tests', () => {
   });
 
   describe('Consumer Unit Tests - Positive', () => {
-    it('instantiates a consumer', () => {
+    it('instantiates a consumer ', () => {
       const consumer = new Consumer();
       expect(consumer.config).to.be.an('Object');
       expect(consumer.config.server.address).to.equal('localhost');
