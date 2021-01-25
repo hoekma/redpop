@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const faker = require('faker');
 const config = require('./test/testConfig');
-const cloneDeep = require('lodash/clonedeep');
+const cloneDeep = require('lodash/cloneDeep');
 
 describe('RedPop Integration Tests', () => {
   let RedPop;
