@@ -36,7 +36,7 @@ describe('Consumer Unit Tests', () => {
   });
 
   describe('Consumer Unit Tests - Positive', () => {
-    it('instantiates a consumer', () => {
+    it('instantiates a consumer ', () => {
       const consumer = new Consumer();
       expect(consumer.config).to.be.an('Object');
       expect(consumer.config.server.address).to.equal('localhost');
@@ -53,11 +53,15 @@ describe('Consumer Unit Tests', () => {
       expect(nanoidStub.calledOnce).equals(true);
     });
 
-    it.skip('sets processing=false after _onBatchesComplete()', async () => {
+    it('sets processing=false after _onBatchesComplete()', async () => {
+      const stub1 = sandbox.stub(Consumer.prototype, '_processPendingEvents');
+      const stub2 = sandbox.stub(Consumer.prototype, '_removeIdleConsumers');
       const consumer = new Consumer(config);
       consumer.processing = true;
       await consumer._onBatchesComplete();
-      expect((consumer.processing = false));
+      expect(consumer.processing).equals(false);
+      expect(stub1.calledOnce).equals(true);
+      expect(stub2.calledOnce).equals(true);
     });
 
     it('has abstract method processEvent', async () => {

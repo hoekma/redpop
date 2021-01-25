@@ -1,18 +1,36 @@
 # redpop
 
-RedPop is a pre-baked Redis 5+ consumer and publisher library for Nodejs.  Use it to greatly simplify the creation of an event bus architecture to create a horizontally scalable data processing applications.  RedPop leverages the work of the ioredis (https://www.npmjs.com/package/ioredis) application and "fills in the gaps" with built-in handlers to deal with the minutae of message replay, cleanup, and consumer and consumer group management. 
+RedPop is a pre-baked Redis 5+ consumer and publisher library for Nodejs.  Use it to greatly simplify the creation of an event bus architecture to create a horizontally scalable data processing applications.  RedPop leverages the work of the ioredis (https://www.npmjs.com/package/ioredis) application and "fills in the gaps" with built-in handlers to deal with the minutae of event replay, cleanup, and consumer and consumer group management. 
 
 # configuration for pubisher {default}
 
 ```javascript
 {
-    server: {
-        // URI of the Redis server (default localhost)
-        address: 'localhost',
-        // TCP port the Redis server is listening on (default 6370)
-        port: 6370,
-        // Redis connection type -- standalone or cluster (default standalone)
+     server: {
+        // Redis connection type -- standalone or cluster
         connectionType: 'standalone',
+        // Connection for standalone connectionType
+        conection: {
+            // URI of the Redis server (default localhost)
+            // Do NOT include protocol like REDIS://localhost or REDIS://somedomain.amazonaws.com
+            host: 'localhost',
+            // TCP port the Redis server is listening on (default 6370)
+            port: 6370,
+        },
+        // Array of connections for cluster connectionType
+        connections: {[          
+            // URI of the Redis server (default localhost)
+            // Do NOT include protocol like REDIS://localhost or REDIS://somedomain.amazonaws.com
+            host: 'localhost',
+            // TCP port the Redis server is listening on (default 6370)
+            port: 7000,
+        ]},
+        // Other options that can be passed in.  See ioredis documentation here:
+        // https://github.com/luin/ioredis/blob/master/API.md
+        options: {
+        }
+        // Optional password if your server's requirepass is set to a password
+        password: 'yourpassword'
     },
     stream: {
         // name of the stream or 'topic' (default redpop)
@@ -26,13 +44,30 @@ RedPop is a pre-baked Redis 5+ consumer and publisher library for Nodejs.  Use i
 ```javascript
 {
      server: {
-        // URI of the Redis server (default localhost)
-        // Do NOT include protocol like REDIS://localhost or REDIS://somedomain.amazonaws.com
-        address: 'localhost',
-        // TCP port the Redis server is listening on (default 6370)
-        port: 6370,
-        // Redis connection type -- standalone or cluster (default standalone)
-        connectionType: 'standalone',
+         // Redis connection type -- standalone or cluster
+         connectionType: 'standalone',
+         // Connection for standalone connectionType
+         conection: {
+            // URI of the Redis server (default localhost)
+            // Do NOT include protocol like REDIS://localhost or REDIS://somedomain.amazonaws.com
+            host: 'localhost',
+            // TCP port the Redis server is listening on (default 6370)
+            port: 6370,
+        }
+        // Array of connections for cluster connectionType
+        connections: [{         
+            // URI of the Redis server (default localhost)
+            // Do NOT include protocol like REDIS://localhost or REDIS://somedomain.amazonaws.com
+            host: 'localhost',
+            // TCP port the Redis server is listening on (default 6370)
+            port: 7000,
+        }],
+        options: {
+            // ioRedis options that can be passed in.  See ioredis documentation here:
+            // https://github.com/luin/ioredis/blob/master/API.md
+        },
+        // Optional password if your server's requirepass is set to a password
+        password: 'yourpassword'
     },
     stream: {
         // name of the stream or 'topic' (default redpop)
@@ -40,50 +75,50 @@ RedPop is a pre-baked Redis 5+ consumer and publisher library for Nodejs.  Use i
     },
     consumer: {
         // Consumer group pool that takes the same action
-        group: 'redpop_consumer'
+        group: 'redpop_consumer',
         // Unique name of the consumer instance
-        name: 'redpop_consumer_uuid'
+        name: 'redpop_consumer_uuid',
         // How long does the consumer wait for a batch of events each cycle (default 2 seconds)
-        waitTimeMs: 2000
+        waitTimeMs: 2000,
         // How long the consumer is idle before being recycled from the server pool (default 90 mins)
-        idleTimeoutMs: 5400000
+        idleTimeoutMs: 5400000,
         // If a consumer doesn't process an event fast enough, how long before
         // the event is put back into the pool for reprocessing (default 2 mins)
-        eventPendingTimeoutMs: 120000
+        eventPendingTimeoutMs: 120000,
         // How many events will the consumer pull from the server each time (default 50)
-        batchSize: 50
+        batchSize: 50,
         // How many times does an event get replayed before the event is discarded (default 3)
         // This will discard an event if it is erroring out repeatedly
-        eventMaximumReplays: 4
+        eventMaximumReplays: 3,
+        // How many times to poll for events.  If true, it will poll once and exit, otherwise it will 
+        // poll indefinitely until the process is shut down.  If false, the calling program can create
+        // a custom loop that calls consumer.start() to poll for events.
+        runOnce: true
     },
-     // How many times to poll for messages.  If true, it will poll once and exit, otherwise it will 
-     // poll indefinitely until the process is shut down.  Used to create loops that control multiple consumers.
-    runOnce: true
 }
-
 ```
 
-# RedPop.Publisher -- Publishing a Message
+# RedPop.Publisher -- Publishing an Event
 
-Using RedPop to publish a message, you send it an object which is a key-value pair. The value can be any data type including complex objects.
+Using RedPop to publish a event, you send it an object which is a key-value pair. The value can be any data type including complex objects.
 
 ## Example 1:
 
-Simple example of publishing a message to the stream defined in `config.js`
+Simple example of publishing a event to the stream defined in `config.js`
 
 ```javascript
     const { Publisher } = require('@hoekma/redpop');
     const config = require('./config'); // contains RedPop config file
     const publisher = new Publisher(config);
 
-    const message = { id: 1234, name: 'John Doe' };
-    publisher.publish(message);
+    const event = { id: 1234, name: 'John Doe' };
+    publisher.publish(event);
 ```
 
-The consumer's processMessage might look like this:
+The consumer's processEvent might look like this:
 
 ```javascript
-    aysnc processMessage = (event)=> {
+    aysnc processEvent = (event)=> {
         console.log(event.id);
         console.log(event.data.id);
     }
@@ -91,25 +126,25 @@ The consumer's processMessage might look like this:
 
 ## Example 2:
 
-Publish a more complex message to a specific stream, overriding the stream name in `config.js`.  Why overrid the config file?   Well, if your consumer wants to republish a message to a different stream.  You may wantto do this, for instance, for logging, sending a notification, or publishing a new version of data to a different consumer as a part of a transformation pipeline.
+Publish a more complex event to a specific stream, overriding the stream name in `config.js`.  Why overrid the config file?   Well, if your consumer wants to republish a event to a different stream.  You may wantto do this, for instance, for logging, sending a notification, or publishing a new version of data to a different consumer as a part of a transformation pipeline.
 
 ```javascript
     const { Publisher } = require('@hoekma/redpop');
     const config = require('./config');  // contains RedPop config file. See Aboves
     const publisher = new Publisher(config);
     const streamName = 'someOtherStream';
-    const message =
+    const event =
         { action: 'save',
           payload: {id: 1234, name: 'John Doe'}}s
         };
-    publisher.publish(message, streamName)
+    publisher.publish(event, streamName)
 
 ```
 
-The consumer's processMessage might look like this:
+The consumer's processEvent might look like this:
 
 ```javascript
-    aysnc processMessage = (event)=> {
+    aysnc processEvent = (event)=> {
     const action = event.data.action;
     switch (action) {
         case 'save' :
@@ -124,18 +159,18 @@ The consumer's processMessage might look like this:
 ```
 
 
-# RedPop.consumer -- Consuming a Message
+# RedPop.consumer -- Consuming an Event
 
 RedPop's consumer takes care of all of the headachey things that an event processor needs to be 
 concerned about.
 
 These include:
 
- * Replaying messages that didn't failed processing
- * Canceling replay of messages that failed processing too many times
+ * Replaying events that didn't failed processing
+ * Canceling replay of events that failed processing too many times
  * Cleaning up old consumers
 
-The only thing that you really need to do as a developer is override the processMessage() method.
+The only thing that you really need to do as a developer is override the processEvent() method.
 
 A simple consumer need only include this: 
 
@@ -188,11 +223,11 @@ init() runs when the consumer first starts up.
 
 #### Consumer :: onBatchComplete()
     
-onBatchComplete() runs when the current batch of messages finishes processing.  A batch is defined in the config passed into to the soncusmer class when it instantiates. See batchSize parameter in the consumer config
+onBatchComplete() runs when the current batch of events finishes processing.  A batch is defined in the config passed into to the soncusmer class when it instantiates. See batchSize parameter in the consumer config
 
 #### Consumer :: onBatchesComplete()
 
-onBatchesComplete() runs when the consumer finishes processing all batches of messages.  In other words, the stream has been played to the last message.  Before the consumer goes back into a polling mode.  
+onBatchesComplete() runs when the consumer finishes processing all batches of events.  In other words, the stream has been played to the last event.  Before the consumer goes back into a polling mode.  
 
 
 #### Example consumer with advanced processing: 
@@ -213,15 +248,15 @@ class AuthInitPwdResetConsumer extends Consumer {
 
   async onBatchesComplete() {
     // Runs after each batch is complete.  For example
-    // stream receives 500 messages and config.batchSize=50
-    // this will run after 10 batches of messages.
+    // stream receives 500 events and config.batchSize=50
+    // this will run after 10 batches of events.
     this.passwordsReset = 0;
   }
 
   async onBatchComplete() {
     // Runs after each batch is complete.  For example
-    // stream receives 500 messages and config.batchSize=50
-    // this will run after each batch of 50 messages.
+    // stream receives 500 events and config.batchSize=50
+    // this will run after each batch of 50 events.
     const event = {method: 'email', email: 'admin@yourcompany.com', passwordsReset: this.passwordsReset};
     await this.publish(event, this.adminNotifyStream);  
   }

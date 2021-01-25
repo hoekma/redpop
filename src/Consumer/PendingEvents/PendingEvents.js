@@ -1,11 +1,8 @@
-const RedPop = require('../../RedPop');
 const EventBatch = require('../EventBatch/EventBatch');
 const isEmpty = require('lodash/isEmpty');
 
 // Array element numbers to make the redis responses easier to understand
 const EVENT_ID = 0;
-// const EVENT_CONSUMER = 1;
-// const EVENT_TIMEPENDING = 2;
 const EVENT_REPLAY_COUNT = 3;
 
 // PendingEvents will search for events on the Redis stream
@@ -17,15 +14,15 @@ const EVENT_REPLAY_COUNT = 3;
 // the event before deleteing the mssage from the bus (i.e. the event will
 // never successuflly run so stop retrying)
 
-class PendingEvents extends RedPop {
+class PendingEvents {
   constructor(consumer) {
-    super(consumer.config);
     this.consumer = consumer;
+    this.config = consumer.config;
     this.pendingMessges = [];
   }
 
   async _removeMaxRetries() {
-    // Removes messages that have been retried too many times by
+    // Removes events that have been retried too many times by
     // XACK'ing them.  They remain in the stream.
     this._pendingEvents = this._pendingEvents.filter(event => {
       if (
@@ -42,7 +39,7 @@ class PendingEvents extends RedPop {
   }
 
   async _replayIdleEvents() {
-    // The consumer will claim the messages and attempt
+    // The consumer will claim the events and attempt
     // to replay them as if they were a new batch that came in.
     if (this._pendingEvents.length > 0) {
       const pendingEventIds = this._pendingEvents.reduce((eventIds, event) => {
@@ -50,10 +47,10 @@ class PendingEvents extends RedPop {
         return eventIds;
       }, []);
 
-      const eventsToReplay = await this.xclaim(pendingEventIds);
+      const eventsToReplay = await this.consumer.xclaim(pendingEventIds);
 
       if (!isEmpty(eventsToReplay)) {
-        // This will rebuild the list of messages into an equivalent
+        // This will rebuild the list of events into an equivalent
         // format as XREAD produces to create an EventBatch instance
         //
         const xreadFormat = [[this.config.stream.name, eventsToReplay]];
@@ -67,7 +64,7 @@ class PendingEvents extends RedPop {
     // Retrieve pending events
     // Discard pendingEvents that have been retried config.eventMaximumReplays
 
-    this._pendingEvents = await this.xpending();
+    this._pendingEvents = await this.consumer.xpending();
     await this._removeMaxRetries();
 
     // Replay events that were claimed by a consumer

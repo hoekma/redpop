@@ -37,20 +37,20 @@ Run the publisher
 2. Ensure both windows are visible
 3. npm run demoPublisher
 
-Observe messages play in the consumer window.
+Observe events play in the consumer window.
 
 Repeat the publisher several times.
 
-To replay all messages
+To replay all events
 
 1. In the publisher shell window or a new shell
 2. npm run demoReplay
 
-All of the messages in the Redis stream will replay and the results can be observed in the consumer window.
+All of the events in the Redis stream will replay and the results can be observed in the consumer window.
 
 Things to try:
 
-1. Edit the publisher file to publish more messages.
+1. Edit the publisher file to publish more events.
 2. Edit the consumer's config to play with the batch size
 
 Note: the consumer should be run in its own window as it continually listens for events.  

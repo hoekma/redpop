@@ -17,7 +17,7 @@ const wait = ms => {
 };
 
 // This is our consumer class for the tests
-class PendingMessageTestConsumer extends Consumer {
+class PendingEventTestConsumer extends Consumer {
   constructor(config) {
     super(config);
     this.sendxack = false;
@@ -65,9 +65,9 @@ describe('PendingEvents Integration Tests', () => {
       '>'
     );
 
-    const pendingMessages = await redPop.xpending();
+    const pendingEvents = await redPop.xpending();
     expect(
-      isEmpty(pendingMessages),
+      isEmpty(pendingEvents),
       'beforeEach - Pending events should not exist'
     ).equals(true);
   });
@@ -78,35 +78,34 @@ describe('PendingEvents Integration Tests', () => {
 
   describe('PendingEvents - Postive Tests', () => {
     it('processes pending events', async () => {
-      // Publish a message
+      // Publish an event
       const publisher = new Publisher(config);
       await publisher.publish({ v: 'test' });
 
-      // Let the consumer play the message
-      const consumer = new PendingMessageTestConsumer(config);
+      // Let the consumer play the event
+      const consumer = new PendingEventTestConsumer(config);
       await consumer.start();
 
-      // Verify that there is a pending message
-      let pendingMessages = await consumer.xpending();
-      expect(isEmpty(pendingMessages), 'Pending events should exist').equals(
+      // Verify that there is a pending event
+      let pendingEvents = await consumer.xpending();
+      expect(isEmpty(pendingEvents), 'Pending events should exist').equals(
         false
       );
 
-      // Wait for the pending message timeout to pass
+      // Wait for the pending events timeout to pass
       wait(config.consumer.pendingEventTimeoutMs + 100);
 
-      // Now that we're set up, let's try to replay the message after
+      // Now that we're set up, let's try to replay the event after
       // two seconds;
 
-      consumer.sendxack = true; // Let it xack the message this time
+      consumer.sendxack = true; // Let it xack the event this time
       const pendingEvent = new PendingEvents(consumer);
       await pendingEvent.processPendingEvents();
-      pendingMessages = await consumer.xpending();
+      pendingEvents = await consumer.xpending();
 
-      expect(
-        isEmpty(pendingMessages),
-        'Pending events should not exist'
-      ).equals(true);
+      expect(isEmpty(pendingEvents), 'Pending events should not exist').equals(
+        true
+      );
     });
   });
 });

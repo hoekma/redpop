@@ -14,6 +14,6 @@ module.exports = {
     batchSize: 50,
     idleEventTimeoutMs: 600000,
     idleConsumererTimeoutMs: 5400000,
-    messageMaximumReplays: 3
+    eventMaximumReplays: 3
   }
 };

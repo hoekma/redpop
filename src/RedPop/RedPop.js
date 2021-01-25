@@ -28,26 +28,6 @@ class RedPop {
 
   _setConfig(config) {
     this.config = config || cloneDeep(defaultConfig);
-    if (config && config.server) {
-      this.config.server.address = config.server.address
-        ? config.server.address
-        : this.config.server.address;
-
-      this.config.server.port = config.server.port
-        ? config.server.port
-        : this.config.server.port;
-
-      this.config.server.type = config.server.type
-        ? config.server.type
-        : this.config.server.type;
-    }
-
-    if (config && config.stream) {
-      this.config.stream.name = config.stream.name
-        ? config.stream.name
-        : this.config.stream.name;
-    }
-
     this.setConfig();
   }
 
@@ -65,23 +45,59 @@ class RedPop {
    */
 
   _initRedis() {
-    switch (this.config.server.type) {
-      case 'cluster': {
-        break;
-      }
-      default: {
-        const connectionParameters = {
-          port: this.config.server.port,
-          host: this.config.server.address
+    const server = this.config.server;
+    let connectionObject = {
+      ...server.options,
+      ...defaultConfig.server.options
+    };
+
+    switch (server.connectionType) {
+      case 'standalone': {
+        connectionObject = {
+          ...connectionObject,
+          ...server.connection
         };
 
+        if (server.password) {
+          connectionObject.password = server.password;
+        }
+
         try {
-          this.redis = new Redis(connectionParameters);
+          this.redis = new Redis(connectionObject);
+          console.log(
+            `Connected in standalone mode to ${connectionObject.host}`
+          );
+        } catch (e) {
+          this.redis = null;
+          console.log(e);
+          throw new Error('Unable to create Redis connection.');
+        }
+        break;
+      }
+      case 'cluster': {
+        if (server.password) {
+          connectionObject = {
+            ...connectionObject,
+            redisOptions: { password: server.password }
+          };
+        }
+
+        try {
+          this.redis = new Redis.Cluster(
+            this.config.server.connections,
+            connectionObject
+          );
+          console.log(
+            `Connected in cluster mode to ${this.config.server.connections[0].host}`
+          );
         } catch (e) {
           this.redis = null;
           throw new Error('Unable to create Redis connection.');
         }
         break;
+      }
+      default: {
+        throw new Error('Redis server type not specificed');
       }
     }
   }
