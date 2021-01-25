@@ -54,12 +54,14 @@ describe('Consumer Unit Tests', () => {
     });
 
     it('sets processing=false after _onBatchesComplete()', async () => {
-      sandbox.stub(Consumer.prototype, '_processPendingEvents');
-      sandbox.stub(Consumer.prototype, '_removeIdleConsumers');
+      const stub1 = sandbox.stub(Consumer.prototype, '_processPendingEvents');
+      const stub2 = sandbox.stub(Consumer.prototype, '_removeIdleConsumers');
       const consumer = new Consumer(config);
       consumer.processing = true;
       await consumer._onBatchesComplete();
-      expect((consumer.processing = false));
+      expect(consumer.processing).equals(false);
+      expect(stub1.calledOnce).equals(true);
+      expect(stub2.calledOnce).equals(true);
     });
 
     it('has abstract method processEvent', async () => {
