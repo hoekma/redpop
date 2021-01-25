@@ -96,7 +96,6 @@ RedPop is a pre-baked Redis 5+ consumer and publisher library for Nodejs.  Use i
         runOnce: true
     },
 }
-
 ```
 
 # RedPop.Publisher -- Publishing an Event
