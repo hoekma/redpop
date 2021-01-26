@@ -87,38 +87,38 @@ describe('RedPop Unit Tests', () => {
   });
 
   it('calls xlen', async () => {
-    const redPop = new RedPop();
+    const redPop = new RedPop().connect();
     await redPop.xlen();
     expect(xlenStub.calledOnce).equals(true);
   });
 
   it('calls xdel', async () => {
-    const redPop = new RedPop();
+    const redPop = new RedPop().connect();
     await redPop.xdel();
     expect(xdelStub.calledOnce).equals(true);
   });
 
   it('calls xadd', async () => {
-    const redPop = new RedPop();
+    const redPop = new RedPop().connect();
     await redPop.xadd([{ v: 'test', n: 12, j: { t: 'test' } }]);
     expect(xaddStub.calledOnce).equals(true);
   });
 
   it('calls xtrim', async () => {
-    const redPop = new RedPop();
+    const redPop = new RedPop().connect();
     const numberTrimmed = await redPop.xtrim(10);
     expect(xtrimStub.calledOnce).equals(true);
     expect(numberTrimmed).equals(1);
   });
 
   it('calls xack', async () => {
-    const redPop = new RedPop();
+    const redPop = new RedPop().connect();
     await redPop.xack('eventId', 'stream', 'group');
     expect(xackStub.calledOnce).equals(true);
   });
 
   it('calls xreadgroup', async () => {
-    const redPop = new RedPop();
+    const redPop = new RedPop().connect();
     await redPop.xreadgroup([
       'GROUP',
       'groupname',
@@ -135,7 +135,7 @@ describe('RedPop Unit Tests', () => {
   });
 
   it('calls xclaim', async () => {
-    const redPop = new RedPop();
+    const redPop = new RedPop().connect();
     const xclaimedEvents = await redPop.xclaim([12345]);
     expect(xclaimStub.calledOnce).equals(true);
     expect(Array.isArray(xclaimedEvents)).equals(true);

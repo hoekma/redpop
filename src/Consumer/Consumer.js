@@ -83,7 +83,9 @@ class Consumer extends RedPop {
   async start() {
     const stream = this.config.stream;
     const consumer = this.config.consumer;
-
+    if (!this.connected) {
+      this.connect();
+    }
     await this._init();
     let done = false;
 

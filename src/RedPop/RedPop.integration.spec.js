@@ -16,19 +16,19 @@ describe('RedPop Integration Tests', () => {
     it('connects to a standalone instance', async () => {
       const configCopy = cloneDeep(config);
       configCopy.server.connectionType = 'standalone';
-      const redPop = new RedPop(configCopy);
+      const redPop = new RedPop(configCopy).connect();
       expect(redPop).to.be.an('object');
     });
 
     it('connects to a cluster instance', async () => {
       const configCopy = cloneDeep(config);
       configCopy.server.connectionType = 'cluster';
-      const redPop = new RedPop(configCopy);
+      const redPop = new RedPop(configCopy).connect();
       expect(redPop).to.be.an('object');
     });
 
     it('xlen returns an integer', async () => {
-      const redPop = new RedPop(config);
+      const redPop = new RedPop(config).connect();
       const length = await redPop.xlen();
       expect(length).to.be.a('Number');
     });
@@ -45,7 +45,7 @@ describe('RedPop Integration Tests', () => {
       const jsonEvent = JSON.parse(jsonText);
 
       // Get a new RedPop instance and add an event
-      const redPop = new RedPop(config);
+      const redPop = new RedPop(config).connect();
       // Store the current length of the stream
       const lengthBefore = await redPop.xlen();
       // Add an event - validate and store the event Id
@@ -66,7 +66,7 @@ describe('RedPop Integration Tests', () => {
       configCopy.server.connectionType = '';
       let errorWasThrown = false;
       try {
-        const redPop = new RedPop(configCopy);
+        const redPop = new RedPop(configCopy).connect();
         // technically we shouldn't get past the instantiation so make
         // this fail we did.
         expect(redPop).to.not.be.an(

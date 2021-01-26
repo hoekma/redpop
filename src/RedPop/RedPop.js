@@ -14,7 +14,7 @@ const cloneDeep = require('lodash/cloneDeep');
 class RedPop {
   constructor(config) {
     this._setConfig(config);
-    this._initRedis();
+    this.connected = false;
   }
 
   /**
@@ -41,64 +41,64 @@ class RedPop {
   }
 
   /**
-   * _initRedis -- Instantiates an ioredis instance.
+   * connect -- Instantiates an ioredis instance.
    */
 
-  _initRedis() {
-    const server = this.config.server;
-    let connectionObject = {
-      ...server.options,
-      ...defaultConfig.server.options
-    };
+  connect() {
+    if (!this.connected) {
+      const server = this.config.server;
+      let connectionObject = {
+        ...server.options,
+        ...defaultConfig.server.options
+      };
 
-    switch (server.connectionType) {
-      case 'standalone': {
-        connectionObject = {
-          ...connectionObject,
-          ...server.connection
-        };
-
-        if (server.password) {
-          connectionObject.password = server.password;
-        }
-
-        try {
-          this.redis = new Redis(connectionObject);
-          console.log(
-            `Connected in standalone mode to ${connectionObject.host}`
-          );
-        } catch (e) {
-          this.redis = null;
-          console.log(e);
-          throw new Error('Unable to create Redis connection.');
-        }
-        break;
-      }
-      case 'cluster': {
-        if (server.password) {
+      switch (server.connectionType) {
+        case 'standalone': {
           connectionObject = {
             ...connectionObject,
-            redisOptions: { password: server.password }
+            ...server.connection
           };
-        }
 
-        try {
-          this.redis = new Redis.Cluster(
-            this.config.server.connections,
-            connectionObject
-          );
-          console.log(
-            `Connected in cluster mode to ${this.config.server.connections[0].host}`
-          );
-        } catch (e) {
-          this.redis = null;
-          throw new Error('Unable to create Redis connection.');
+          if (server.password) {
+            connectionObject.password = server.password;
+          }
+
+          try {
+            this.redis = new Redis(connectionObject);
+            this.connected = true;
+            return this;
+          } catch (e) {
+            this.redis = null;
+            console.log(e);
+            throw new Error('Unable to create Redis connection.');
+          }
         }
-        break;
+        case 'cluster': {
+          if (server.password) {
+            connectionObject = {
+              ...connectionObject,
+              redisOptions: { password: server.password }
+            };
+          }
+
+          try {
+            this.redis = new Redis.Cluster(
+              this.config.server.connections,
+              connectionObject
+            );
+            this.connected = true;
+            return this;
+          } catch (e) {
+            this.redis = null;
+            throw new Error('Unable to create Redis connection.');
+          }
+        }
+        default: {
+          throw new Error('Redis server type not specificed');
+        }
       }
-      default: {
-        throw new Error('Redis server type not specificed');
-      }
+    } else {
+      return this;
     }
   }
 
