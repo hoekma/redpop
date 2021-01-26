@@ -109,7 +109,7 @@ Simple example of publishing a event to the stream defined in `config.js`
 ```javascript
     const { Publisher } = require('@hoekma/redpop');
     const config = require('./config'); // contains RedPop config file
-    const publisher = new Publisher(config);
+    const publisher = new Publisher(config).connect();
 
     const event = { id: 1234, name: 'John Doe' };
     publisher.publish(event);
@@ -131,7 +131,7 @@ Publish a more complex event to a specific stream, overriding the stream name in
 ```javascript
     const { Publisher } = require('@hoekma/redpop');
     const config = require('./config');  // contains RedPop config file. See Aboves
-    const publisher = new Publisher(config);
+    const publisher = new Publisher(config).connect();
     const streamName = 'someOtherStream';
     const event =
         { action: 'save',
@@ -195,9 +195,9 @@ That's it!  To call it you might have an index.js file that runs this code:
     const Consumer = require('./consumer');
     const config = require('./config');
 
-    const consumer = new Consumer(config);
+    const consumer = new Consumer(config); // you can call .connect() or the consumer will connect when start() runs.
 
-    console.info('Starting authInitPwdReset consumer');
+    console.info('Starting my cool consumer');
     console.info('Press ctrl-c to quit');
 
     consumer.start();
@@ -284,3 +284,79 @@ class AuthInitPwdResetConsumer extends Consumer {
 
 module.exports = AuthInitPwdResetConsumer;
 ```
+<br>
+### Testing
+
+Redpop includes a `connect()` method to initiate the actual Redis connection.  The reason it doesn't conect automatically is to support unit testing.  This allows the test code to unit test RedPop instances without actually connecting to Redis.  
+
+While the `connect()` method returns an instance of RedPop and can be called on one line:
+
+```javascript
+const publisher = new Publisher().connect()
+```
+
+an alternate approach that supports stubbing and unit testing would be:
+
+```javascript
+const publisher = new Publisher() 
+publisher.connect()
+```
+
+In this way, you can stub the `connect()` method to prevent an actual connection to Redis from happening.  
+
+For instance, let's say you have a consumer that consumes the event, mutates the payload, and then publishes back onto another stream.  
+
+Here's an example of how you can test it using `sinon` and `mocha`:
+
+```javascript
+// Consumer Code - MyConsumer.js
+const { Consumer, Publisher } = require('@hoekma/redpop')
+
+class MyConsumer extends Consumer {
+    constructor(config) {
+      super(config);
+      this.publisher = new Publisher(config);
+      this.publisher.connect(); // This will be stubbed
+    }
+
+    async processMessage(event){
+        const mutatedMessgae = {...event.data, processedDate: new Date()}
+        await publisher.publish(mutatedMessgae, 'someOtherStream')
+        return true;
+    }
+}
+
+```
+
+Now you can test this without the publisher or the consumer actually trying to make an actual connection to a Redis server:
+
+```javascript
+// Test Code
+const { Publisher } = require('@hoekma/redpop');
+const MyConsumer = require('./MyConsumer');
+
+const sandbox = require('sinon').createSandbox();
+
+describe(`some Consumer's Tests`, () => {
+    let event = {id: '123456789-1', data: {email: 'someone@gmail.com'}}
+    let pubStub;
+    let connectStub;
+    beforeEach(() => {
+        pubStub = sandbox.stub(Publisher.prototype, 'publish');  // Stub here
+        conectStub = sandbox.stub(Publisher.prototype, 'connect');  // Stub here
+    });
+
+    afterEach(() => {
+        sandbox.restore();
+    });
+
+    it('unit tests my subscriber without connecting', () => {
+        const myConsumer = new MyConsumer();
+        processMessageResult = myConsumer.processMesage(event);
+        sandbox.assert.calledOnce(pubStub)
+        sandbox.assert.calledOnce(connectStub)
+    })
+});
+```
+
+Notice that we did not stub the Consumer's `connect()`.  This is because we did not call the Consumer's did not call `connect()` method in this program.  The Consumer will automatically connect to Redis, however when the `start()` method invoked.

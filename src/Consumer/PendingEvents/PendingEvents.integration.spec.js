@@ -32,7 +32,7 @@ class PendingEventTestConsumer extends Consumer {
 describe('PendingEvents Integration Tests', () => {
   beforeEach(async () => {
     // Make sure it's trimmed to 0 if it already existed
-    const redPop = new RedPop(config);
+    const redPop = new RedPop(config).connect();
 
     // Create the stream
     try {
@@ -79,7 +79,7 @@ describe('PendingEvents Integration Tests', () => {
   describe('PendingEvents - Postive Tests', () => {
     it('processes pending events', async () => {
       // Publish an event
-      const publisher = new Publisher(config);
+      const publisher = new Publisher(config).connect();
       await publisher.publish({ v: 'test' });
 
       // Let the consumer play the event

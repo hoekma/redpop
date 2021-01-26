@@ -19,7 +19,7 @@ const wait = ms => {
 describe('IdleConsumers Integration Tests', () => {
   beforeEach(async () => {
     // Make sure it's trimmed to 0 if it already existed
-    const redPop = new RedPop(config);
+    const redPop = new RedPop(config).connect();
 
     // Create the stream
     try {
@@ -60,7 +60,7 @@ describe('IdleConsumers Integration Tests', () => {
   describe('IdleConsumers - Postive Tests', () => {
     it('removes an idle consumer', async () => {
       // Publish an event
-      const publisher = new Publisher(config);
+      const publisher = new Publisher(config).connect();
       await publisher.publish({ v: 'test' });
 
       // Let the consumer play the event
