@@ -287,22 +287,7 @@ module.exports = AuthInitPwdResetConsumer;
 <br>
 ### Testing
 
-Redpop includes a `connect()` method to initiate the actual Redis connection.  The reason it doesn't conect automatically is to support unit testing.  This allows the test code to unit test RedPop instances without actually connecting to Redis.  
-
-While the `connect()` method returns an instance of RedPop and can be called on one line:
-
-```javascript
-const publisher = new Publisher().connect()
-```
-
-an alternate approach that supports stubbing and unit testing would be:
-
-```javascript
-const publisher = new Publisher() 
-publisher.connect()
-```
-
-In this way, you can stub the `connect()` method to prevent an actual connection to Redis from happening.  
+Redpop includes a `connect()` method to initiate the actual Redis connection.  This allows the test code to unit test RedPop instances without actually connecting to Redis.  
 
 For instance, let's say you have a consumer that consumes the event, mutates the payload, and then publishes back onto another stream.  
 
@@ -316,7 +301,6 @@ class MyConsumer extends Consumer {
     constructor(config) {
       super(config);
       this.publisher = new Publisher(config);
-      this.publisher.connect(); // This will be stubbed
     }
 
     async processMessage(event){
@@ -358,5 +342,3 @@ describe(`some Consumer's Tests`, () => {
     })
 });
 ```
-
-Notice that we did not stub the Consumer's `connect()`.  This is because we did not call the Consumer's did not call `connect()` method in this program.  The Consumer will automatically connect to Redis, however when the `start()` method invoked.
