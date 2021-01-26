@@ -117,6 +117,7 @@ class RedPop {
    */
 
   async xlen(stream) {
+    this.connect();
     const streamName = stream || this.config.stream.name;
     return this.redis.xlen(streamName);
   }
@@ -130,6 +131,7 @@ class RedPop {
    */
 
   async xdel(eventId, stream) {
+    this.connect();
     const streamName = stream || this.config.stream.name;
 
     return this.redis.xdel(streamName, eventId);
@@ -144,6 +146,7 @@ class RedPop {
    */
 
   async xadd(event, stream) {
+    this.connect();
     const streamName = stream || this.config.stream.name;
 
     const params = [];
@@ -161,6 +164,7 @@ class RedPop {
    * @param {String} params Array of parameters
    */
   async xtrim(maxLength, stream) {
+    this.connect();
     const streamName = stream || this.config.stream.name;
 
     return this.redis.xtrim(streamName, 'MAXLEN', maxLength);
@@ -171,6 +175,7 @@ class RedPop {
    * @param {Object} params  JSON object with xreadgroup parameters
    */
   async xreadgroup(...params) {
+    this.connect();
     return this.redis.xreadgroup(...params);
   }
 
@@ -181,6 +186,7 @@ class RedPop {
    * @stream {string} (optional) stream name
    */
   async xack(eventId, group, stream) {
+    this.connect();
     const streamName = stream || this.config.stream.name;
     const groupName = group || this.config.consumer.group;
 
@@ -192,6 +198,7 @@ class RedPop {
    * @param {String} params Array of parameters
    */
   async xgroup(...params) {
+    this.connect();
     return this.redis.xgroup(...params);
   }
 
@@ -200,6 +207,7 @@ class RedPop {
    * @param {String} params Array of parameters
    */
   async xinfo(...params) {
+    this.connect();
     return this.redis.xinfo(...params);
   }
 
@@ -208,6 +216,7 @@ class RedPop {
    * @param {String} params Array of parameters
    */
   async xpending() {
+    this.connect();
     return this.redis.xpending(
       this.config.stream.name,
       this.config.consumer.group,
@@ -226,6 +235,7 @@ class RedPop {
    * @param {Integer} timeoutMS (optional) timeout of idle event in MS
    */
   async xclaim(eventIds, stream, group, consumer, timeoutMS) {
+    this.connect();
     const streamName = stream || this.config.stream.name;
     const groupName = group || this.config.consumer.group;
     const consumerName = consumer || this.config.consumer.name;
