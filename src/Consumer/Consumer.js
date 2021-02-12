@@ -90,33 +90,35 @@ class Consumer extends RedPop {
     let done = false;
 
     while (!done) {
-      const batch = await this.xreadgroup([
-        'GROUP',
-        consumer.group,
-        consumer.name,
-        'BLOCK',
-        consumer.waitTimeMs,
-        'COUNT',
-        consumer.batchSize,
-        'STREAMS',
-        stream.name,
-        '>'
-      ]);
+      try {
+        const batch = await this.xreadgroup([
+          'GROUP',
+          consumer.group,
+          consumer.name,
+          'BLOCK',
+          consumer.waitTimeMs,
+          'COUNT',
+          consumer.batchSize,
+          'STREAMS',
+          stream.name,
+          '>'
+        ]);
 
-      if (!batch) {
-        await this._onBatchesComplete();
-      } else {
-        const eventBatch = new EventBatch(batch);
-        await this._onBatchReceived(eventBatch);
-        await this._onBatchComplete();
-      }
+        if (!batch) {
+          await this._onBatchesComplete();
+        } else {
+          const eventBatch = new EventBatch(batch);
+          await this._onBatchReceived(eventBatch);
+          await this._onBatchComplete();
+        }
 
-      if (this.config.consumer.runOnce) {
-        // used for tests to break out of the loop
-        // normally this loop never ends until the
-        // process is terminated.
-        done = true;
-      }
+        if (this.config.consumer.runOnce) {
+          // used for tests to break out of the loop
+          // normally this loop never ends until the
+          // process is terminated.
+          done = true;
+        }
+      } catch (e) {}
     }
 
     return 'stopped';
