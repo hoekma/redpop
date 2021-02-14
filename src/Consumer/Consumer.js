@@ -118,7 +118,21 @@ class Consumer extends RedPop {
           // process is terminated.
           done = true;
         }
-      } catch (e) {}
+      } catch (e) {
+        try {
+          console.log('Redis server connection lost, resetting connection....');
+          console.log('Disconnecting');
+          this.disconnectRedis();
+          console.log('Reconnecting');
+          this.connected = false;
+          this.connect();
+          console.log('Initializing');
+          this._init();
+          console.log('Finished resetting connection');
+        } catch (e) {
+          console.log(e);
+        }
+      }
     }
 
     return 'stopped';
