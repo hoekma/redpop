@@ -66,14 +66,17 @@ class Consumer extends RedPop {
    */
 
   async _processEvents(batch) {
-    Promise.all(
-      batch.getEvents().map(async event => {
-        const result = await this.processEvent(event);
-        if (result) {
-          await this.xack(event.id);
-        }
-      })
-    );
+    const events = batch.getEvents();
+    // process events[] sequentially vs. Promise.all(events.map(...)) to prevent
+    // a race condition with the consumer instance's properties if the
+    // consumer uses this.someProperty to handle state within a call.
+    for (let current = 0; current < events.length; current++) {
+      const currentEvent = events[current];
+      const result = await this.processEvent(currentEvent);
+      if (result) {
+        await this.xack(currentEvent.id);
+      }
+    }
   }
 
   /**
