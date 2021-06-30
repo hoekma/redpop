@@ -1,6 +1,6 @@
 # redpop
 
-RedPop is a pre-baked Redis 5+ consumer and publisher library for Nodejs.  Use it to greatly simplify the creation of an event bus architecture to create a horizontally scalable data processing applications.  RedPop leverages the work of the ioredis (https://www.npmjs.com/package/ioredis) application and "fills in the gaps" with built-in handlers to deal with the minutae of event replay, cleanup, and consumer and consumer group management. 
+RedPop is a pre-baked Redis 5+ consumer and publisher library for Nodejs.  Use it to simplify the creation of an event bus architecture and to create a horizontally scalable data processing applications.  RedPop leverages the work of the ioredis (https://www.npmjs.com/package/ioredis) application and "fills in the gaps" with built-in handlers to deal with the minutae of event replay, cleanup, and consumer and consumer group management. 
 
 # configuration for pubisher {default}
 
@@ -126,7 +126,7 @@ The consumer's processEvent might look like this:
 
 ## Example 2:
 
-Publish a more complex event to a specific stream, overriding the stream name in `config.js`.  Why overrid the config file?   Well, if your consumer wants to republish a event to a different stream.  You may wantto do this, for instance, for logging, sending a notification, or publishing a new version of data to a different consumer as a part of a transformation pipeline.
+Publish a more complex event to a specific stream, overriding the stream name in `config.js`.  Why override the config file?   Well, if your consumer wants to republish a event to a different stream.  You may want to do this, for instance, for logging, sending a notification, or publishing a new version of data to a different consumer as a part of a transformation pipeline.
 
 ```javascript
     const { Publisher } = require('@hoekma/redpop');
@@ -148,10 +148,10 @@ The consumer's processEvent might look like this:
     const action = event.data.action;
     switch (action) {
         case 'save' :
-             callSaveMethod(event.data.payload);
+             this.saveMethod(event.data.payload);
              return true;
         case 'delete' :
-             callDeleteMethod(event.data.payload.id);
+             this.deleteMethod(event.data.payload.id);
              return true;
         default : 
             return false;
@@ -166,7 +166,7 @@ concerned about.
 
 These include:
 
- * Replaying events that didn't failed processing
+ * Replaying events that failed during processing (e.g. database unavailable)
  * Canceling replay of events that failed processing too many times
  * Cleaning up old consumers
 
@@ -180,7 +180,7 @@ A simple consumer need only include this:
     async processEvent(event) {
         const myEventId = event.id
         const myEventPayload = event.data
-        doSomethingWith(myEventPayload);
+        this.doSomethingWith(myEventPayload);
         return true;
     }
 
@@ -262,7 +262,7 @@ class AuthInitPwdResetConsumer extends Consumer {
   }
 
   async processEvent(event) {
-    const resetCode = storePaswordResetCode(event.data.user);
+    const resetCode = this.storePasswordResetCode(event.data.user);
     const emailPublisher = new Publisher(this.config)
     
     const eventToPublish1 = {method: 'email', email: event.data.user.email, resetCode: resetCode};
