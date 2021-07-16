@@ -36,7 +36,9 @@ class Consumer extends RedPop {
         'MKSTREAM'
       );
     } catch (e) {
-      console.log('Unexpected error running this.xgroup');
+      console.log(
+        `Found existing consumer group '${this.config.consumer.group}'`
+      );
     }
 
     await this.init();
@@ -93,6 +95,11 @@ class Consumer extends RedPop {
     }
     await this._init();
     let done = false;
+
+    if (!stream?.name) {
+      console.log('Error - Consumer requires a stream to be configured');
+      return false;
+    }
 
     while (!done) {
       try {

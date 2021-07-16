@@ -53,6 +53,6 @@ class DemoConsumer extends Consumer {
 
 const consumer = new DemoConsumer(config);
 
-console.info(`Starting Consumer ${consumer.config.consumer.name}`);
+console.info(`Starting Consumer ${consumer.config.consumer.group}`);
 console.info('Press ctrl-c to exit.');
 consumer.start();
