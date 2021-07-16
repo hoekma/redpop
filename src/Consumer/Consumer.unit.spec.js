@@ -36,7 +36,7 @@ describe('Consumer Unit Tests', () => {
     sandbox.restore();
   });
 
-  describe.skip('Consumer Unit Tests - Positive', () => {
+  describe('Consumer Unit Tests - Positive', () => {
     it('instantiates a consumer ', () => {
       const consumer = new Consumer();
       expect(consumer.config).to.be.an('Object');
