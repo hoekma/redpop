@@ -2,7 +2,7 @@ const Consumer = require('../../Consumer');
 const config = require('../demoConfig');
 
 class DemoConsumer extends Consumer {
-  constructor(config) {
+  constructor() {
     super(config);
     this.batchCount = 0;
     this.eventCountCurrentBatch = 0;
@@ -11,7 +11,7 @@ class DemoConsumer extends Consumer {
   }
 
   async onBatchComplete() {
-    this.batchCount++;
+    this.batchCount += 1;
     console.info(
       `Processed ${this.eventCountCurrentBatch} events in batch ${this.batchCount}`
     );
@@ -34,6 +34,7 @@ class DemoConsumer extends Consumer {
     }
   }
 
+  // eslint-disable-next-line no-unused-vars
   async processEvent(event) {
     let successOrFail = true;
     if (this.calculateSuccessOrFail === true) {
@@ -43,8 +44,8 @@ class DemoConsumer extends Consumer {
     }
 
     if (successOrFail) {
-      this.eventCountCurrentBatch++;
-      this.eventCountAllBatches++;
+      this.eventCountCurrentBatch += 1;
+      this.eventCountAllBatches += 1;
     }
     return successOrFail;
   }

@@ -1,11 +1,12 @@
 const { expect } = require('chai');
+const sinon = require('sinon');
 const PendingEvents = require('./PendingEvents');
 const Consumer = require('..');
 const RedPop = require('../../RedPop');
 
 const testConfig = require('../test/testConfig');
 const xreadgroupResponse = require('../test/xreadgroupResponse.mock');
-const sinon = require('sinon');
+
 const sandbox = sinon.createSandbox();
 
 const events = [
@@ -20,7 +21,9 @@ const events = [
 ];
 
 describe('PendingEvents Unit Test', () => {
-  let xackStub, xpendingStub, xclaimStub;
+  let xackStub;
+  let xpendingStub;
+  let xclaimStub;
 
   beforeEach(() => {
     xackStub = sandbox.stub(Consumer.prototype, 'xack');

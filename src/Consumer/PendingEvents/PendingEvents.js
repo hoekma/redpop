@@ -1,5 +1,5 @@
-const EventBatch = require('../EventBatch/EventBatch');
 const isEmpty = require('lodash/isEmpty');
+const EventBatch = require('../EventBatch/EventBatch');
 
 // Array element numbers to make the redis responses easier to understand
 const EVENT_ID = 0;
@@ -32,9 +32,8 @@ class PendingEvents {
         // an error condition causing it to fail.
         this.consumer.xack(event[EVENT_ID]);
         return false;
-      } else {
-        return true;
       }
+      return true;
     });
   }
 

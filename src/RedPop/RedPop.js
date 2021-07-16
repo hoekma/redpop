@@ -1,6 +1,6 @@
 const Redis = require('ioredis');
-const defaultConfig = require('./config');
 const cloneDeep = require('lodash/cloneDeep');
+const defaultConfig = require('./config');
 
 /**
  * Class RedPop -- Top level class from which consumers and pubishers inherit
@@ -46,7 +46,7 @@ class RedPop {
 
   connect() {
     if (!this.connected) {
-      const server = this.config.server;
+      const { server } = this.config;
       let connectionObject = {
         ...server.options,
         ...defaultConfig.server.options
@@ -154,6 +154,7 @@ class RedPop {
       params.push(key);
       const value = event[key];
       params.push(JSON.stringify(value));
+      return null;
     });
 
     return this.redis.xadd(streamName, '*', ...params);

@@ -1,2 +1,1 @@
-const RedPop = require('./RedPop');
-module.exports = RedPop;
+module.exports = require('./RedPop');

@@ -1,11 +1,12 @@
 const { expect } = require('chai');
 const faker = require('faker');
-const config = require('./test/testConfig');
 const cloneDeep = require('lodash/cloneDeep');
+const config = require('./test/testConfig');
 
 describe('RedPop Integration Tests', () => {
   let RedPop;
   before(() => {
+    // eslint-disable-next-line global-require
     RedPop = require('.');
   });
   after(() => {

@@ -1,10 +1,11 @@
+/* eslint-disable no-await-in-loop */
+const cloneDeep = require('lodash/cloneDeep');
+const nanoid = require('nanoid');
 const RedPop = require('../RedPop');
 const EventBatch = require('./EventBatch/EventBatch');
 const PendingEvents = require('./PendingEvents');
 const IdleConsumers = require('./IdleConsumers');
-const nanoid = require('nanoid');
 const defaultConfig = require('./config');
-const cloneDeep = require('lodash/cloneDeep');
 
 /**
  * Consumer is an abstract class that encapsulates
@@ -15,9 +16,9 @@ const cloneDeep = require('lodash/cloneDeep');
  */
 class Consumer extends RedPop {
   constructor(config) {
-    config = config || cloneDeep(defaultConfig);
+    const rpConfig = config || cloneDeep(defaultConfig);
     // process configuration in parent class RedPop
-    super(config);
+    super(rpConfig);
     this.processing = false;
   }
 
@@ -34,7 +35,9 @@ class Consumer extends RedPop {
         '$',
         'MKSTREAM'
       );
-    } catch (e) {}
+    } catch (e) {
+      console.log('Unexpected error running this.xgroup');
+    }
 
     await this.init();
   }
@@ -44,10 +47,10 @@ class Consumer extends RedPop {
    * Sets consumer specific configuration settings
    */
   setConfig() {
-    const consumer = this.config.consumer;
+    const { consumer } = this.config;
     const defConsumer = defaultConfig.consumer;
 
-    consumer.name = this.config.consumer.name + '_' + nanoid.nanoid();
+    consumer.name = `${this.config.consumer.name}_${nanoid.nanoid()}`;
     consumer.waitTimeMs = consumer.waitTimeMs || defConsumer.waitTimeMs;
     consumer.batchSize = consumer.batchSize || defConsumer.batchSize;
     consumer.idleTimeoutMs = consumer.idleTimeoutMs || defConsumer.batchSize;
@@ -67,16 +70,15 @@ class Consumer extends RedPop {
 
   async _processEvents(batch) {
     const events = batch.getEvents();
-    // process events[] sequentially vs. Promise.all(events.map(...)) to prevent
-    // a race condition with the consumer instance's properties if the
-    // consumer uses this.someProperty to handle state within a call.
-    for (let current = 0; current < events.length; current++) {
-      const currentEvent = events[current];
+    await events.reduce(async (memo, event) => {
+      await memo;
+      const currentEvent = event;
       const result = await this.processEvent(currentEvent);
       if (result) {
         await this.xack(currentEvent.id);
       }
-    }
+      return memo;
+    }, Promise.resolve());
   }
 
   /**
@@ -84,8 +86,8 @@ class Consumer extends RedPop {
    */
 
   async start() {
-    const stream = this.config.stream;
-    const consumer = this.config.consumer;
+    const { stream, consumer } = this.config;
+
     if (!this.connected) {
       this.connect();
     }
@@ -132,8 +134,8 @@ class Consumer extends RedPop {
           console.log('Initializing');
           this._init();
           console.log('Finished resetting connection');
-        } catch (e) {
-          console.log(e);
+        } catch (e1) {
+          console.log(e1);
         }
       }
     }
@@ -210,6 +212,7 @@ class Consumer extends RedPop {
    */
 
   async processEvent(event) {
+    console.log('Event Received', event);
     return true;
   }
 
