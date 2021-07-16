@@ -3,7 +3,7 @@ const event = require('./publishData');
 const config = require('../demoConfig');
 
 const publisher = new Publisher(config);
-const iterations = 1;
+const iterations = 20000;
 
 (async () => {
   let i;
