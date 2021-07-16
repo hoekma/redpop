@@ -5,7 +5,7 @@ class Publisher extends RedPop {
     if (!this.connected) {
       this.connect();
     }
-    let streamName = this.config.stream.name;
+    let streamName = this.config?.stream?.name;
     if (stream) {
       streamName = stream;
     }

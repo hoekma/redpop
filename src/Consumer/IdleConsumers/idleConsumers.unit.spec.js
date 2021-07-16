@@ -1,11 +1,13 @@
 const { expect } = require('chai');
+const sandbox = require('sinon').createSandbox();
 const Consumer = require('..');
 const IdleConsumers = require('.');
 const testConfig = require('../test/testConfig');
-const sandbox = require('sinon').createSandbox();
 
 describe('PendingEvents Unit Test', () => {
-  let xinfoStub, xgroupStub, consumer;
+  let xinfoStub;
+  let xgroupStub;
+  let consumer;
 
   beforeEach(() => {
     consumer = new Consumer(testConfig);

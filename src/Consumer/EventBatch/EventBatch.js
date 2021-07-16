@@ -1,4 +1,5 @@
 const cloneDeep = require('lodash/cloneDeep');
+
 const BATCH_STREAM_NAME = 0;
 const BATCH_EVENTS = 1;
 const EVENT_ID = 0;

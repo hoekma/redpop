@@ -8,6 +8,7 @@ const iterations = 20000;
 (async () => {
   let i;
   for (i = 0; i < iterations; i++) {
+    // eslint-disable-next-line no-await-in-loop
     await publisher.publish(event);
   }
   console.info(`Successfully published ${i} events`);

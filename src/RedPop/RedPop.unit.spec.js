@@ -5,15 +5,18 @@ const sinon = require('sinon');
 const sandbox = sinon.createSandbox();
 
 describe('RedPop Unit Tests', () => {
-  let RedPop,
-    xaddStub,
-    xackStub,
-    xreadgroupStub,
-    xdelStub,
-    xlenStub,
-    xtrimStub,
-    xclaimStub;
+  let RedPop;
+  let xaddStub;
+  let xackStub;
+  let xreadgroupStub;
+  let xdelStub;
+  let xlenStub;
+  let xtrimStub;
+  let xclaimStub;
+
   before(() => {
+    // This needs to be required here or the mocking doesn't work.
+    // eslint-disable-next-line global-require
     RedPop = require('.');
   });
   beforeEach(() => {

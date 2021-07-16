@@ -9,8 +9,8 @@ const config = require('../test/testConfig');
 
 // Timer to wait for a certain amount of time.
 const wait = ms => {
-  var start = new Date().getTime();
-  var end = start;
+  const start = new Date().getTime();
+  let end = start;
   while (end < start + ms) {
     end = new Date().getTime();
   }
@@ -18,12 +18,12 @@ const wait = ms => {
 
 // This is our consumer class for the tests
 class PendingEventTestConsumer extends Consumer {
-  constructor(config) {
+  constructor() {
     super(config);
     this.sendxack = false;
   }
 
-  async processEvent(event) {
+  async processEvent() {
     // this should leave
     return this.sendxack;
   }
@@ -37,7 +37,9 @@ describe('PendingEvents Integration Tests', () => {
     // Create the stream
     try {
       redPop.xgroup('DESTROY', config.stream.name, config.consumer.group);
-    } catch (e) {}
+    } catch (e) {
+      console.log('Unexpected error running xgroup', e);
+    }
 
     try {
       await redPop.xgroup(
@@ -47,7 +49,9 @@ describe('PendingEvents Integration Tests', () => {
         '$',
         'MKSTREAM'
       );
-    } catch (e) {}
+    } catch (e) {
+      console.log('Unexpected error running xgroup', e);
+    }
 
     await redPop.xtrim(0);
 

@@ -1,4 +1,2 @@
-const Consumer = require('./Consumer');
-const Publisher = require('./Publisher');
-
-module.exports = { Consumer, Publisher };
+module.exports.Consumer = require('./Consumer');
+module.exports.Publisher = require('./Publisher');

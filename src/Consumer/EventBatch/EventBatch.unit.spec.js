@@ -3,6 +3,7 @@ const EventBatch = require('./EventBatch');
 const xreadgroupResponse = require('../test/xreadgroupResponse.mock');
 
 chai.use(require('chai-datetime'));
+
 const { expect } = chai;
 
 describe('EventBatch Unit Test', () => {
