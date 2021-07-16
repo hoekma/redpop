@@ -96,7 +96,7 @@ class Consumer extends RedPop {
     await this._init();
     let done = false;
 
-    if (!stream || !stream.name) {
+    if (!stream?.name) {
       console.log('Error - Consumer requires a stream to be configured');
       return false;
     }
